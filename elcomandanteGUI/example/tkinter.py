@@ -1,0 +1,41 @@
+#!/usr/bin/python
+
+from Tkinter import *
+
+class Application(Frame):
+    def say_hi(self):
+        self.outputstring += "Hi! "
+        print self.outputstring
+
+    def say_two(self):
+        self.outputstring += "Two "
+        print self.outputstring
+
+    def createWidgets(self):
+        self.QUIT = Button(self)
+        self.QUIT["text"] = "QUIT"
+        self.QUIT["fg"]   = "red"
+        self.QUIT["command"] =  self.quit
+        self.QUIT.pack({"side": "left"})
+
+        self.hi_there = Button(self)
+        self.hi_there["text"] = "Hello",
+        self.hi_there["command"] = self.say_hi
+        self.hi_there.pack({"side": "left"})
+
+        self.add_two = Button(self)
+        self.add_two["text"] = "Two"
+        self.add_two["command"] = self.say_two
+        self.add_two.pack({"side": "left"})
+
+    def __init__(self, master=None):
+        Frame.__init__(self, master)
+        self.pack()
+        self.createWidgets()
+        self.outputstring = ""
+
+root = Tk()
+app = Application(master=root)
+app.mainloop()
+root.destroy()
+
