@@ -1,0 +1,2 @@
+compile:
+g++ -o pt1000 pt1000.cc
