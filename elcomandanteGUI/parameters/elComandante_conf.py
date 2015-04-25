@@ -28,7 +28,6 @@ class elComandante_conf:
 		self.list_Transfer=["host", "port", "destination", "user", "checkForTars"]
 
 		# Pars map containor
-		self.Sections = {}
 		self.Directories = {}
 		self.TestboardAddress = {}
 		self.defaultParameters = {}
@@ -39,6 +38,18 @@ class elComandante_conf:
 		self.xrayClient = {}
 		self.psiClient = {}
 		self.Transfer = {}
+		self.Sections = {
+			"Directories":self.Directories,
+			"TestboardAddress":self.TestboardAddress,
+			"defaultParameters":self.defaultParameters,
+			"subsystem":self.subsystem,
+			"jumoClient":self.jumoClient,
+			"keithleyClient":self.keithleyClient,
+			"lowVoltageClient":self.lowVoltageClient,
+			"xrayClient":self.xrayClient,
+			"psiClient":self.psiClient,
+			"Transfer":self.Transfer
+		}
 	
 	def getDefault(self, elComandante_conf_default):
 		self.loadDefault(elComandante_conf_default)
@@ -52,18 +63,6 @@ class elComandante_conf:
 		self.fill("xrayClient",        self.list_xrayClient,        self.xrayClient )
 		self.fill("psiClient",         self.list_psiClient,         self.psiClient )
 		self.fill("Transfer",          self.list_Transfer,          self.Transfer )
-		self.Sections = {
-			"Directories":self.Directories,
-			"TestboardAddress":self.TestboardAddress,
-			"defaultParameters":self.defaultParameters,
-			"subsystem":self.subsystem,
-			"jumoClient":self.jumoClient,
-			"keithleyClient":self.keithleyClient,
-			"lowVoltageClient":self.lowVoltageClient,
-			"xrayClient":self.xrayClient,
-			"psiClient":self.psiClient,
-			"Transfer":self.Transfer
-		}
 
 	def loadDefault(self, elComandante_conf_default):
 		self.defaultConf = elComandante_conf_default
