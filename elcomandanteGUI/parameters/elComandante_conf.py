@@ -62,7 +62,7 @@ class elComandante_conf:
 			self.list_Sections[9]:self.Transfer
 		}
 
-	def loadDefault(self, elComandante_conf_default):
+	def loadDefault(self, elComandante_conf_default="elComandante.conf.default"):
 		self.defaultConf = elComandante_conf_default
 		if not os.path.isfile(self.defaultConf):
 			print ">> [ERROR] Can't find "+self.defaultConf+", or it's not a file..."
@@ -73,7 +73,9 @@ class elComandante_conf:
 			self.hasDefault = True 
 		return
 
-	def fill(self, section, options, output ):
+	def fill(self, section="", options=[], output={} ):
+		if not self.parser.has_section(section):
+			print ">> [ERRO] No section: "+section
 		if self.hasDefault:
 			for opt in options:
 				if self.parser.has_option(section, opt):
@@ -81,7 +83,7 @@ class elComandante_conf:
 					if self.debug: 
 						print ">> [DEBUG] Got option: {0:>25s} in {1:<20s}".format( opt, section)
 				else:
-					print ">> [WARNING] No option: "+opt+" in "+section
+					print ">> [ERROR] No option: "+opt+" in "+section
 		else:
 			print ">> [ERROR] Please do elComandante_conf.loadDault(file) first." 
 			sys.exit()
