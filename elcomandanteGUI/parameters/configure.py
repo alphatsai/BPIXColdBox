@@ -3,7 +3,6 @@ import os, re, sys, shutil
 import math, ROOT
 
 #sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
-from beautyLine import *
 from ConfigParser import *
 
 class configure:
