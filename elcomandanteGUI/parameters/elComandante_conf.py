@@ -11,10 +11,11 @@ class elComandante_conf:
 	def __init__(self, debug=False):
 		self.defaultConf = ""
 		self.parser = SafeConfigParser()
+		self.parser.optionxform = str
 		self.hasDefault = False
 		self.debug = debug	
 
-		# Pars list
+		# Pars list -  can be customily extended by fuctions 
 		self.list_Sections = [
 			"Directories", 
 			"TestboardAddress", 
@@ -27,18 +28,20 @@ class elComandante_conf:
 			"psiClient", 
 			"Transfer"
 		]
-		self.list_Directories=["baseDir", "testDefinitions", "moduleDB", "subserverDir", "dataDir", "jumoDir", "keithleyDir", "defaultParameters", "scriptDir"]
-		self.list_TestboardAddress=["TB0", "TB1", "TB2", "TB3"]
-		self.list_defaultParameters=["Roc", "Full"]
-		self.list_subsystem=["Ziel", "Port", "coolingBoxSubscription", "keithleySubscription", "psiSubscription", "xraySubscription", "analysisSubscription"]
-		self.list_jumoClient=["port", "programName"]
-		self.list_keithleyClient=["port"]
-		self.list_lowVoltageClient=["lowVoltageType"]
-		self.list_xrayClient=["xrayDevice", "xrayType", "xrfDevice", "xrfType", "xrfTargets", "turnOffHV", "beamOffBetweenTests"]
-		self.list_psiClient=["psiVersion"]
-		self.list_Transfer=["host", "port", "destination", "user", "checkForTars"]
-
-		# Pars map containor
+		# Default sections and options in elComandante_conf
+		self.list_Default = {
+			self.list_Sections[0]:["baseDir", "testDefinitions", "moduleDB", "subserverDir", "dataDir", "jumoDir", "keithleyDir", "defaultParameters", "scriptDir"],
+			self.list_Sections[1]:["TB0", "TB1", "TB2", "TB3"],
+			self.list_Sections[2]:["Roc", "Full"],
+			self.list_Sections[3]:["Ziel", "Port", "coolingBoxSubscription", "keithleySubscription", "psiSubscription", "xraySubscription", "analysisSubscription"],
+			self.list_Sections[4]:["port", "programName"],
+			self.list_Sections[5]:["port"],
+			self.list_Sections[6]:["lowVoltageType"],
+			self.list_Sections[7]:["xrayDevice", "xrayType", "xrfDevice", "xrfType", "xrfTargets", "turnOffHV", "beamOffBetweenTests"],
+			self.list_Sections[8]:["psiVersion"],
+			self.list_Sections[9]:["host", "port", "destination", "user", "checkForTars"]
+		}
+		# Pars map - default containor
 		self.Directories = {}
 		self.TestboardAddress = {}
 		self.defaultParameters = {}
@@ -49,7 +52,8 @@ class elComandante_conf:
 		self.xrayClient = {}
 		self.psiClient = {}
 		self.Transfer = {}
-		self.Sections = {
+		self.Sections = { 
+			# Default sections and options
 			self.list_Sections[0]:self.Directories,
 			self.list_Sections[1]:self.TestboardAddress,
 			self.list_Sections[2]:self.defaultParameters,
@@ -60,48 +64,51 @@ class elComandante_conf:
 			self.list_Sections[7]:self.xrayClient,
 			self.list_Sections[8]:self.psiClient,
 			self.list_Sections[9]:self.Transfer
+			# Can be customily extended by fuction
 		}
 
-	def loadDefault(self, elComandante_conf_default="elComandante.conf.default"):
+	def loadDefault(self, elComandante_conf_default="elComandante.conf.default" ):
 		self.defaultConf = elComandante_conf_default
 		if not os.path.isfile(self.defaultConf):
 			print ">> [ERROR] Can't find "+self.defaultConf+", or it's not a file..."
-			sys.exit()
 		else: 
-			print '>> [INFO] Reading %s...' %self.defaultConf
 			self.parser.read(self.defaultConf)
 			self.hasDefault = True 
+			print '>> [INFO] Loaded %s...' %self.defaultConf
 		return
 
-	def fill(self, section="", options=[], output={} ):
-		if not self.parser.has_section(section):
-			print ">> [ERRO] No section: "+section
-		if self.hasDefault:
-			for opt in options:
-				if self.parser.has_option(section, opt):
-					output[opt]=self.parser.get(section, opt)
-					if self.debug: 
-						print ">> [DEBUG] Got option: {0:>25s} in {1:<20s}".format( opt, section)
-				else:
-					print ">> [ERROR] No option: "+opt+" in "+section
-		else:
-			print ">> [ERROR] Please do elComandante_conf.loadDault(file) first." 
-			sys.exit()
-		return
-
-	def getDefault(self, elComandante_conf_default):
+	# It will load default sections and options from elComandante.conf default structure,
+	# If you want use new section and options in elComandante.conf, then "addNewSection" has to be "True"
+	def getDefault(self, elComandante_conf_default, addNewSection=False ):
 		self.loadDefault(elComandante_conf_default)
-		self.fill("Directories",       self.list_Directories,       self.Directories )
-		self.fill("TestboardAddress",  self.list_TestboardAddress,  self.TestboardAddress )
-		self.fill("defaultParameters", self.list_defaultParameters, self.defaultParameters )
-		self.fill("subsystem",         self.list_subsystem,         self.subsystem )
-		self.fill("jumoClient",        self.list_jumoClient,        self.jumoClient )
-		self.fill("keithleyClient",    self.list_keithleyClient,    self.keithleyClient )
-		self.fill("lowVoltageClient",  self.list_lowVoltageClient,  self.lowVoltageClient )
-		self.fill("xrayClient",        self.list_xrayClient,        self.xrayClient )
-		self.fill("psiClient",         self.list_psiClient,         self.psiClient )
-		self.fill("Transfer",          self.list_Transfer,          self.Transfer )
+		print '>> [INFO] Checking default parameter...' 
+		for defaultSection in self.list_Default:
+			if not self.parser.has_section(defaultSection):
+				print ">> [ERROR] No default section: '"+defaultSection+"' in "+elComandante_conf_default
+				print ">>         Teminated elComandante_conf::getDefault()"
+				return
+			else:
+				for defaultOpt in self.list_Default[defaultSection]:
+					if not self.parser.has_option( defaultSection, defaultOpt): 
+						print ">> [ERROR] No default option: '"+defaultOpt+"' under "+defaultSection+" in "+elComandante_conf_default
+						print ">>         Teminated elComandante_conf::getDefault()"
+						return
+		print '>> [INFO] Filling parameters...' 
+		for loadSection in self.parser.sections():
+			if loadSection in self.list_Default:
+				for loadOpt in self.parser.options(loadSection):
+					self.Sections[loadSection][loadOpt]=self.parser.get(loadSection, loadOpt)
+					if self.debug: 
+						print ">> [DEBUG] Got default {0:<15s} option: {1:<25s}".format("'"+loadSection+"'", loadOpt)
+			else: 	
+				if addNewSection:
+					self.makeNewSection(loadSection)
+					for loadOpt in self.parser.options(loadSection):
+						self.makeNewOption( loadSection, loadOpt, self.parser.get(loadSection, loadOpt))
+						if self.debug: 
+							print ">> [DEBUG] Got default {0:<15s} option: {1:<25s}".format("'"+loadSection+"'", loadOpt)
 		return
+
 
 	def listSections(self):
 		print ">> [INFO] Call elComandante_conf::listSections()"	
@@ -110,16 +117,18 @@ class elComandante_conf:
 			print ">>                  "+sec
 		return
 	
-	def makeNewSection(self, newSec, newOpts={} ):
+	#def makeNewSection(self, newSec, newOpts={} ):
+	def makeNewSection(self, newSec ):
 		if self.debug:  
 			print ">> [DEBUG] Call elComandante_conf::makeNewSection( newSec, newOpts  )"	
 			print ">>         newSec: "+newSec	
-			print ">>         newOpts: "+str(newOpts)
+			#print ">>         newOpts: "+str(newOpts)
 		if newSec in self.Sections:
 			print ">> [ERROR] Section "+newSec+" existed"
 			return
-		self.list_Sections.append(newSec)
-		self.Sections[newSec]=newOpts
+		else:
+			self.list_Sections.append(newSec)
+			self.Sections[newSec]={}
 		return
 
 	def makeNewOption(self, secName, newOptsName, newValue="" ):
@@ -200,13 +209,13 @@ class elComandante_conf:
 ################ example ################
 #elini = elComandante_conf(debug=True)
 ##elini = elComandante_conf()
-#elini.getDefault("../elComandante.conf")
+#elini.getDefault("../elComandante.conf", True)
 #elini.listSections()
 #elini.listOptions("mySection")
-#newopts = {"Opt1":""}
-#elini.makeNewSection("mySection1", newopts)
+#elini.makeNewSection("mySection1")
 #elini.makeNewSection("mySection1")
 #elini.makeNewSection("mySection2")
+#elini.makeNewSection("mySection3")
 #elini.listSections()
 #elini.listOptions("mySection")
 #elini.listOptions("mySection1")
