@@ -58,7 +58,7 @@ class configure:
 						print ">> [ERROR] No default option: '"+defaultOpt+"' under "+defaultSection+" in "+configFile
 						print ">>         Teminated %s::getDefault()"% self.className
 						return
-		print '>> [INFO] Filling parameters...' 
+		print '>> [INFO] Filling parameters...'
 		for loadSection in self.parser.sections():
 			if loadSection in self.list_Default:
 				for loadOpt in self.parser.options(loadSection):
@@ -82,7 +82,6 @@ class configure:
 			print ">>                  "+sec
 		return
 	
-	#def makeNewSection(self, newSec, newOpts={} ):
 	def makeNewSection(self, newSec ):
 		if self.debug:  
 			print ">> [DEBUG] Call %s::makeNewSection( newSec, newOpts  )"% self.className	

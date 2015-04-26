@@ -3,8 +3,7 @@ import os, re, sys, shutil
 import math, ROOT
 
 #sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
-#from beautyLine import *
-#from ConfigParser import *
+from ConfigParser import *
 from configure import *
 
 class elComandante_conf(configure):
@@ -31,6 +30,7 @@ class elComandante_conf(configure):
 			"psiClient", 
 			"Transfer"
 		]
+
 		# Default sections and options in elComandante_conf
 		self.list_Default = {
 			self.list_Sections[0]:["baseDir", "testDefinitions", "moduleDB", "subserverDir", "dataDir", "jumoDir", "keithleyDir", "defaultParameters", "scriptDir"],
@@ -44,55 +44,46 @@ class elComandante_conf(configure):
 			self.list_Sections[8]:["psiVersion"],
 			self.list_Sections[9]:["host", "port", "destination", "user", "checkForTars"]
 		}
-		# Pars map - default containor
-		self.Directories = {}
-		self.TestboardAddress = {}
-		self.defaultParameters = {}
-		self.subsystem = {}
-		self.jumoClient = {}
-		self.keithleyClient = {}
-		self.lowVoltageClient = {}
-		self.xrayClient = {}
-		self.psiClient = {}
-		self.Transfer = {}
+
+		# Pars map - containor
 		self.Sections = { 
 			# Default sections and options
-			self.list_Sections[0]:self.Directories,
-			self.list_Sections[1]:self.TestboardAddress,
-			self.list_Sections[2]:self.defaultParameters,
-			self.list_Sections[3]:self.subsystem,
-			self.list_Sections[4]:self.jumoClient,
-			self.list_Sections[5]:self.keithleyClient,
-			self.list_Sections[6]:self.lowVoltageClient,
-			self.list_Sections[7]:self.xrayClient,
-			self.list_Sections[8]:self.psiClient,
-			self.list_Sections[9]:self.Transfer
+			self.list_Sections[0]:{},
+			self.list_Sections[1]:{},
+			self.list_Sections[2]:{},
+			self.list_Sections[3]:{},
+			self.list_Sections[4]:{},
+			self.list_Sections[5]:{},
+			self.list_Sections[6]:{},
+			self.list_Sections[7]:{},
+			self.list_Sections[8]:{},
+			self.list_Sections[9]:{}
 			# Can be customily extended by fuction
 		}
 
 
 ################ example ################
-#elini = elComandante_conf(debug=True)
-##elini = elComandante_conf()
-#elini.getDefault("../elComandante.conf", True)
-#elini.listSections()
-#elini.listOptions("mySection")
-#elini.makeNewSection("mySection1")
-#elini.makeNewSection("mySection1")
-#elini.makeNewSection("mySection2")
-#elini.makeNewSection("mySection3")
-#elini.listSections()
-#elini.listOptions("mySection")
-#elini.listOptions("mySection1")
-#elini.listOptions("mySection2")
-#elini.makeNewOption("mySection1", "Opt1", "Here")
-#elini.makeNewOption("mySection1", "Opt2", "Here")
-#elini.makeNewOption("mySection2", "Opt1", "Here")
-#elini.listOptions("Transfer")
-#elini.callOption("Transfer", "user" )
-#elini.changeOptValue("mySection1", "Opt3", "There" )
-#elini.changeOptValue("mySection1", "Opt1", "There" )
-#elini.changeOptValue("Transfer", "user", "jtsai" )
-#elini.callOption("Transfer", "user" )
-#elini.callConfig()
-#elini.makeConfig()
+elconf = elComandante_conf(debug=True)
+#elconf = elComandante_conf()
+elconf.getDefault("../elComandante.conf", True)
+elconf.listSections()
+elconf.listOptions("mySection")
+elconf.makeNewSection("mySection1")
+elconf.makeNewSection("mySection1")
+elconf.makeNewSection("mySection2")
+elconf.makeNewSection("mySection3")
+elconf.listSections()
+elconf.listOptions("mySection")
+elconf.listOptions("mySection1")
+elconf.listOptions("mySection2")
+elconf.makeNewOption("mySection1", "Opt1", "Here")
+elconf.makeNewOption("mySection1", "Opt2", "Here")
+elconf.makeNewOption("mySection2", "Opt1", "Here")
+elconf.listOptions("Transfer")
+elconf.callOption("Transfer", "user" )
+elconf.changeOptValue("mySection1", "Opt3", "There" )
+elconf.changeOptValue("mySection1", "Opt1", "There" )
+elconf.changeOptValue("Transfer", "user", "jtsai" )
+elconf.callOption("Transfer", "user" )
+elconf.callConfig()
+elconf.makeConfig()
