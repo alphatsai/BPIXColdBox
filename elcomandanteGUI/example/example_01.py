@@ -3,8 +3,8 @@ import os, re, sys, shutil
 import math, ROOT
 
 sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
-from parameters import elComandante_ini 
-from parameters import elComandante_conf
+from readConfg import elComandante_ini 
+from readConfg import elComandante_conf
 
 ################ elComandante_ini ################
 elini = elComandante_ini(debug=True)
