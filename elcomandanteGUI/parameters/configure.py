@@ -171,5 +171,6 @@ class configure:
 			for opt in sorted(self.Sections[section]): 
 				output.write(opt+" : "+self.Sections[section][opt]+"\n") 
 			output.write("\n")
+		print ">> [INFO] Done"
 		return ">> [INFO] Done"
 

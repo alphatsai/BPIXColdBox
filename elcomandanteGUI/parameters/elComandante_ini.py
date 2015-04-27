@@ -95,29 +95,3 @@ class elComandante_ini(configure):
 			# Can be customily extended by fuction
 		}
 
-
-################ example ################
-#elini = elComandante_ini(debug=True)
-##elini = elComandante_ini()
-#elini.getDefault("../elComandante.ini", True)
-#elini.listSections()
-#elini.listOptions("mySection")
-#elini.makeNewSection("mySection1")
-#elini.makeNewSection("mySection1")
-#elini.makeNewSection("mySection2")
-#elini.makeNewSection("mySection3")
-#elini.listSections()
-#elini.listOptions("mySection")
-#elini.listOptions("mySection1")
-#elini.listOptions("mySection2")
-#elini.makeNewOption("mySection1", "Opt1", "Here")
-#elini.makeNewOption("mySection1", "Opt2", "Here")
-#elini.makeNewOption("mySection2", "Opt1", "Here")
-#elini.listOptions("Transfer")
-#elini.callOption("Transfer", "user" )
-#elini.changeOptValue("mySection1", "Opt3", "There" )
-#elini.changeOptValue("mySection1", "Opt1", "There" )
-#elini.changeOptValue("Transfer", "user", "jtsai" )
-#elini.callOption("Transfer", "user" )
-#elini.callConfig()
-#elini.makeConfig()
