@@ -2,20 +2,14 @@
 import os, re, sys, shutil
 import math, ROOT
 
-#sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
-from ConfigParser import *
 from configure import *
 
 class elComandante_conf(configure):
 
 	def __init__(self, debug=False):
+		configure.__init__(self, debug)
 		self.className = "elComandante_conf"
 		self.defaultOutput = "elComandante.conf"
-		self.defaultConf = ""
-		self.parser = SafeConfigParser()
-		self.parser.optionxform = str
-		self.hasDefault = False
-		self.debug = debug
 
 		# Pars list -  can be customily extended by fuctions 
 		self.list_Sections = [
