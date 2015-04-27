@@ -2,7 +2,6 @@
 import os, re, sys, shutil
 import math, ROOT
 
-#sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
 from ConfigParser import *
 
 class configure:
@@ -72,7 +71,6 @@ class configure:
 						if self.debug: 
 							print ">> [DEBUG] Got default {0:<15s} option: {1:<25s}".format("'"+loadSection+"'", loadOpt)
 		return
-
 
 	def listSections(self):
 		print ">> [INFO] Call %s::listSections()"% self.className	
@@ -172,5 +170,5 @@ class configure:
 				output.write(opt+" : "+self.Sections[section][opt]+"\n") 
 			output.write("\n")
 		print ">> [INFO] Done"
-		return ">> [INFO] Done"
+		return 
 
