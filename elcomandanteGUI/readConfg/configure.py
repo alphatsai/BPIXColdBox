@@ -70,7 +70,7 @@ class configure:
 						self.makeNewOption( loadSection, loadOpt, self.parser.get(loadSection, loadOpt))
 						if self.debug: 
 							print ">> [DEBUG] Got default {0:<15s} option: {1:<25s}".format("'"+loadSection+"'", loadOpt)
-			print '>> [INFO] Done!'
+		print '>> [INFO] Done!'
 		return
 
 	def listSections(self):
