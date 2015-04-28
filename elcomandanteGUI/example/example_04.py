@@ -5,12 +5,12 @@ import math, ROOT
 from Tkinter import *
 
 sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
-from readConfg import elComandante_ini 
+from readConfg import elComandante_ini
 from readConfg import elComandante_conf
 
 class interface():
 	def __init__(self, master=None):
-		self.f0 = Frame(master, bg='White')
+		self.f0 = Frame(master, bg='Gray')
 		self.f0.grid()
 		self.f1 = None
 		self.f2 = None
@@ -33,21 +33,21 @@ class interface():
 		]	
 	
 	def creatCanvas(self):
-		fpad = Frame(self.f0, height=20, bd=1, relief=RAISED, bg='White', )
-		self.f2 = Frame(self.f0, bg='black', height=200, relief=SUNKEN, borderwidth=1)
+		fpad = Frame(self.f0, height=20, bd=1, relief=RAISED, bg='Gray', )
+		self.f2 = Frame(self.f0, bg='black', height=200, relief=SUNKEN, borderwidth=3)
 		if self.f1 != None:
 			fpad.grid(row=2, column=0, )	
-			self.f2.grid(row=3,column=0) 
+			self.f2.grid(row=3,column=0)
 		else:	
 			fpad.grid(row=0, column=0, )	
 			self.f2.grid(row=1,column=0)
- 
-		canvas = Canvas(self.f2, width=600, height=200, bg='Gray')  
-		canvas.pack()                  
-		canvas.create_line(0, 0, 600, 200) 
+
+		canvas = Canvas(self.f2, width=600, height=200, bg='White')
+		canvas.pack()
+		canvas.create_line(0, 0, 600, 200)
 
 	def createWidgets(self):
-		fpad = Frame(self.f0, height=20, bd=1,  bg='White', )
+		fpad = Frame(self.f0, height=20, bd=1,  bg='Gray', )
 		self.f1 = Frame(self.f0, relief=RAISED, borderwidth=2)
 		if self.f2 != None:
 			fpad.grid(row=2, column=0, )	
