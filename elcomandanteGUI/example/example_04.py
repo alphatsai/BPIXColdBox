@@ -72,7 +72,6 @@ class interface():
 		for section in self.iniClass.list_Sections:
 			if section in self.iniSkipLists:
 				continue
-			print sCol	
 			fsub = Frame(self.f1)
 			if sCol == 0:
 				fspad = Frame(self.f1, width=10)
