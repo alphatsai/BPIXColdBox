@@ -34,7 +34,7 @@ class interface():
 	
 	def creatCanvas(self):
 		fpad = Frame(self.f0, height=20, bd=1, relief=RAISED, bg='White', )
-		self.f2 = Frame(self.f0, bg='black', height=200)
+		self.f2 = Frame(self.f0, bg='black', height=200, relief=SUNKEN, borderwidth=1)
 		if self.f1 != None:
 			fpad.grid(row=2, column=0, )	
 			self.f2.grid(row=3,column=0) 
@@ -47,8 +47,8 @@ class interface():
 		canvas.create_line(0, 0, 600, 200) 
 
 	def createWidgets(self):
-		fpad = Frame(self.f0, height=20, bd=1, relief=RAISED, bg='White', )
-		self.f1 = Frame(self.f0)
+		fpad = Frame(self.f0, height=20, bd=1,  bg='White', )
+		self.f1 = Frame(self.f0, relief=RAISED, borderwidth=2)
 		if self.f2 != None:
 			fpad.grid(row=2, column=0, )	
 			self.f1.grid(row=3,column=0)
@@ -95,7 +95,7 @@ class interface():
 				newOptEntry = Entry(fsub)
 				self.iniOptionsLabel[section].append(newOptLabel)
 				self.iniOptionsLabel[section][iopt]["text"] = opt
-				self.iniOptionsLabel[section][iopt].grid( row=irow, column=0, sticky=W+N )
+				self.iniOptionsLabel[section][iopt].grid( row=irow, column=0, sticky=E+N )
 				self.iniOptionsEntry[section].append(newOptEntry)
 				self.iniOptionsEntry[section][iopt]['width'] = 10
 				self.iniOptionsEntry[section][iopt].insert(0, self.iniClass.Sections[section][opt])
