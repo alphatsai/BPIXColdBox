@@ -136,7 +136,7 @@ class Planificador(Frame):
             self.textopiezanuevo.grid(row=int(self.num_piezas)+1, column=0)
 
             var = StringVar()
-            menu = OptionMenu(self.listFrame, var, *self.mispiezas, bg='gray')
+            menu = OptionMenu(self.listFrame, var, *self.mispiezas, bg='Gray')
             menu.grid(row=self.n, column=1)
             menu.config(width=10)
             menu.grid(row=int(self.num_piezas)+1, column=1)

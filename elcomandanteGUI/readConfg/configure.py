@@ -152,12 +152,15 @@ class configure:
 		return
 
 	def callConfig(self):
-		print "\n############ Current %s #################\n"% self.defaultOutput
+		print ">> [INFO] Print out current configure"
+		print ">> ================== Current %s =================\n"% self.defaultOutput
 		for section in self.list_Sections:
 			print " ["+section+"]"
 			for opt in sorted(self.Sections[section]): 
 				print " "+opt+" : "+self.Sections[section][opt] 
 			print "\n"
+		print ">> ======================================================"
+		print ">> [INFO] DONE!"
 		return
 
 	def makeConfig( self, outFile=None ):
