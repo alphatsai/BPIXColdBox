@@ -46,8 +46,13 @@ class interface():
 		return
 
 	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg="IndianRed2", font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
-		self.QUIT = Button(frame, font=font, bg=bg, text=text, command=frame.quit)
+		self.QUIT = Button(frame, font=font, bg=bg, text=text, command=self.quit)
 		self.QUIT.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
+		return
+
+	def quit(self):
+		print '>> [INFO] Ciao~ :-D'
+		self.framMain.quit()
 		return
 
 	def addLabel(self, secName, name, frame, row, column, sticky='nsew', columnspan=1, bg=BG_framMain, font=("Arial",10)):
