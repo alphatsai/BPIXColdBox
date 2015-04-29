@@ -13,14 +13,11 @@ BG_framTitle='Gray'
 BG_framConfig='LightBlue1'
 BG_framMain='wheat1'
 TRUE_COLOR='OliveDrab1'
-#newButton['bg']="green2"
 FALSE_COLOR='PeachPuff3'
-#FALSE_COLOR='DarkOrange3'
 ERROR_COLOR='DeepPink2'
 PREVIEW_COLOR='CadetBlue2'
-#PREVIEW_COLOR='DeepSkyBlue2'
 MENU_FULL_COLOR='SkyBlue1'
-MENU_ROC_COLOR='DarkOliveGreen1'
+MENU_ROC_COLOR='MediumPurple1'
 
 class interface():
 	def __init__(self, master=None):
@@ -158,7 +155,7 @@ class interface():
 		name=term1+term2+name1
 
 		var=StringVar()
-		newMenu = OptionMenu(frame, var, "Full", "Roc" )
+		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
 		newMenu['bg'] = ERROR_COLOR
 		if value.lower() !=  "full" and value.lower() != "roc":
@@ -172,19 +169,27 @@ class interface():
 			newMenu['bg'] = MENU_ROC_COLOR
 			var.set(value)
 		newMenu.grid( row=row, column=column, sticky=sticky)
+		newMenu['menu'].delete(0)
+		newMenu['menu'].add_command( label="Full", command=lambda:self.chooseFull(newMenu, name0, name1, var))
+		newMenu['menu'].add_command( label="Roc",  command=lambda:self.chooseRoc(newMenu, name0, name1, var))
 		self.MuduelTypeMenu[name]=newMenu
 
-	def changeModuelType(self, name, selction, option):
-		if self.BoolButtons[name]['text'] == "False":
-			print ">> [INFO] Change %s : %s : False -> True "%(selction, option)
-			self.BoolButtons[name]['text']="True"
-			self.BoolButtons[name]['bg']=TRUE_COLOR
-			self.iniClass.changeOptValue(selction,option,"True")
-		else:
-			print ">> [INFO] Change %s : %s : %s -> False "%(selction, option, self.BoolButtons[name]['text'] )
-			self.BoolButtons[name]['text']="False"
-			self.BoolButtons[name]['bg']=FALSE_COLOR
-			self.iniClass.changeOptValue(selction,option,"False")
+	def chooseFull(self, menu, selction, option, var):
+		value = self.iniClass.Sections[selction][option]
+		if value != 'Full':
+			print ">> [INFO] Change %s : %s : %s -> Full "%(selction, option, value)
+			menu['bg'] = MENU_FULL_COLOR
+			var.set('Full')
+			self.iniClass.changeOptValue(selction,option,"Full")
+		return
+
+	def chooseRoc(self, menu, selction, option, var):
+		value = self.iniClass.Sections[selction][option]
+		if value != 'Roc':
+			print ">> [INFO] Change %s : %s : %s -> Roc "%(selction, option, value)
+			menu['bg'] = MENU_ROC_COLOR
+			var.set('Roc')
+			self.iniClass.changeOptValue(selction,option,"Roc")
 		return
 
 	def createWidgets(self):
@@ -335,7 +340,6 @@ class interface():
 ####### example ########
 if __name__ == '__main__':
 	root = Tk()
-	#root.geometry("400x400+300+300") 
 	app = interface(master=root)
 	app.loadConfig("./elComandante.ini.default")
 	app.createWidgets()
