@@ -145,7 +145,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,"False")
 		return
 
-	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=7):
+	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=8):
 		term1=""
 		term2=""
 		if label!="" :
