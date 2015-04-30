@@ -12,7 +12,6 @@ from readConfg import elComandante_conf
 Delay_MAX=8 #sec
 CYCLE_MAX=20
 COLUMNMAX=9
-#BG_framMain='wheat1'
 BG_framMain='LightCyan3'
 TRUE_COLOR='OliveDrab1'
 FALSE_COLOR='PeachPuff3'
@@ -24,6 +23,7 @@ QUIT_COLOR='IndianRed2'
 MENU_FULL_COLOR='SkyBlue1'
 MENU_ROC_COLOR='MediumPurple'
 BYTYPING_COLOR='khaki1'
+ENTRY_COLOR='white smoke'
 
 class interface():
 	def __init__(self, master=None):
@@ -104,22 +104,48 @@ class interface():
 
 		newEntry = Entry(frame)
 		newEntry['width'] = width
-		newEntry['bg']='white smoke'
+		newEntry['bg']=ENTRY_COLOR
 		newEntry.insert(0, value)
 		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+		self.Entries[name]=newEntry
+		return name
+
+	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, byTyping=True ):
+		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan, byTyping)
+		newEntry = self.Entries[name]
 		if byTyping:
 			newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry))
+			newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+			newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
+			newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+		else:
+			newEntry.bind('<Key>', lambda event:self.unTouch(newEntry, value))
+			newEntry.bind('<Leave>', lambda event:self.unTouch(newEntry, value))
+			newEntry.bind('<Return>', lambda event:self.unTouch(newEntry, value))
+			newEntry.bind('<FocusOut>', lambda event:self.unTouch(newEntry, value))
 		self.Entries[name]=newEntry
 		return
 
 	def chEntryBG(self, entry):
 		entry['bg']=BYTYPING_COLOR
+		return
 
-	def getEntry(self, enrty, name, section, option ):
-		print ">> [INFO] Change %s : %s : %s -> %s "%(selction, option, self.iniClass.Sections[section][option], enrty.get())
-		self.iniClass.changeOptValue(selction,option, enrty.get())
+	def checkChanging(self, entry, value):
+		if value == entry.get():
+			entry['bg']=ENTRY_COLOR
+		return
 
+	def ConfirmChangeOpt(self, entry, section, option):
+		value=entry.get()
+		print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, self.iniClass.Sections[section][option], value)
+		self.iniClass.changeOptValue(section,option, value)
+		entry['bg']=ENTRY_COLOR
+		return
 
+	def unTouch(self, entry, value):
+		entry.delete(0, END)
+		entry.insert(0, value)
+		return	
 
 	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=5):
 		term1=""
@@ -308,10 +334,12 @@ class interface():
 		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=1, font=('helvetica', 12), sticky='ew')
 
 		self.entryConfig = Entry(self.master)
-		self.entryConfig["width"]=30
+		self.entryConfig["width"]=35
 		self.entryConfig.insert(0, self.loadConfig)
-		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky=EW )
-		
+		self.entryConfig.grid(row=mainRow, column=2, columnspan=2, sticky='ew' )
+		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig))
+		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig,self.loadConfig ))
+
 		self.button1Config = Button(self.master, bg=RELOAD_COLOR, font=('helvetica', 12, 'bold'))
 		self.button1Config["text"]="ReLoad"
 		self.button1Config.grid(row=mainRow, column=COLUMNMAX-5, sticky=EW)
@@ -353,10 +381,10 @@ class interface():
 		value1=self.iniClass.Sections['Modules']['TB1']
 		value2=self.iniClass.Sections['Modules']['TB2']
 		value3=self.iniClass.Sections['Modules']['TB3']
-		self.addEntry(label='Main_DTB', name0='Modules', name1='TB0', frame=self.tb0, value=value0, row=1)
-		self.addEntry(label='Main_DTB', name0='Modules', name1='TB1', frame=self.tb1, value=value1, row=1)
-		self.addEntry(label='Main_DTB', name0='Modules', name1='TB2', frame=self.tb2, value=value2, row=1)
-		self.addEntry(label='Main_DTB', name0='Modules', name1='TB3', frame=self.tb3, value=value3, row=1)
+		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB0', frame=self.tb0, value=value0, row=1)
+		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB1', frame=self.tb1, value=value1, row=1)
+		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB2', frame=self.tb2, value=value2, row=1)
+		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB3', frame=self.tb3, value=value3, row=1)
 
 		value0=self.iniClass.Sections['ModuleType']['TB0']
 		value1=self.iniClass.Sections['ModuleType']['TB1']
@@ -392,7 +420,7 @@ class interface():
 			if opt == 'CoolingBoxUse':
 				self.addBoolButton(label='Main_Setup',name0='CoolingBox',name1=opt,frame=self.CoolingBox,row=irow,value=value,sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow)
 			irow+=1
 
 		self.Keithley = Frame( self.master, bg=BG_framMain)
@@ -406,7 +434,7 @@ class interface():
 			if opt == 'KeithleyUse':
 				self.addBoolButton(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, row=irow, value=value, sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow)
 			irow+=1
 
 		self.LowVoltage = Frame( self.master, bg=BG_framMain)
@@ -420,7 +448,7 @@ class interface():
 			if opt == 'LowVoltageUse':
 				self.addBoolButton(label='Main_Setup',name0='LowVoltage',name1=opt,frame=self.LowVoltage,row=irow,value=value,sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow)
 			irow+=1
 
 		self.Xray = Frame( self.master, bg=BG_framMain)
@@ -434,7 +462,7 @@ class interface():
 			if opt == 'XrayUse':
 				self.addBoolButton(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow, value=value, sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow)
 			irow+=1
 
 		# Process = ['Cycle', 'IV', 'Tests', 'OperationDetails']
@@ -456,7 +484,7 @@ class interface():
 				self.addnCycleMenu( label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol)
 			else:
 				self.addLabel(label='Main_Process', name0='Cycle', name1=opt+u" (\N{DEGREE SIGN}C)", frame=self.Process, row=0, column=icol)
-				self.addEntry(label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol )
+				self.addOptEntry(label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol )
 			icol+=1
 		irow+=2
 
@@ -469,7 +497,7 @@ class interface():
 				self.addDelayMenu( label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol)
 			else:
 				self.addLabel(label='Main_Process', name0='IV', name1=opt+' (Volt)', frame=self.Process, row=irow-1, column=icol)
-				self.addEntry(label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol )
+				self.addOptEntry(label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol )
 			icol+=1
 		irow+=1
 
@@ -477,7 +505,7 @@ class interface():
 			self.addLabel(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, row=irow, font=('helvetica', 12,))
 			value=self.iniClass.Sections['Tests'][opt]
 			if opt == 'Test':
-				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, width=20, columnspan=6, byTyping=False)
+				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, width=20, columnspan=6, byTyping=False)
 				irow+=1
 				self.addLabel(label='Main_Process', name0='Tests', name1='Options', frame=self.Process, row=irow, rowspan=2, sticky='ns', font=('helvetica', 12,))
 				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Process, row=irow, column=1, sticky='ew')
@@ -491,11 +519,11 @@ class interface():
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, sticky='ew', column=3 )
 				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
 			elif opt == 'TestDescription':
-				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, columnspan=4)
+				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, columnspan=4)
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Process, row=irow, column=5 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Clear', frame=self.Process, row=irow, column=6 )
 			else:
-				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1)
+				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1)
 			irow+=1
 	
 		# Pad 
