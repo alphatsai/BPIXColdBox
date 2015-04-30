@@ -24,6 +24,7 @@ MENU_FULL_COLOR='SkyBlue1'
 MENU_ROC_COLOR='MediumPurple'
 BYTYPING_COLOR='khaki1'
 ENTRY_COLOR='white smoke'
+ENTRY_LOCKED_COLOR='light grey'
 
 class interface():
 	def __init__(self, master=None):
@@ -59,11 +60,16 @@ class interface():
 			self.isfixed=False
 			self.buttonLock['text']='Lock'
 			self.buttonLock['bg']=QUIT_COLOR
-			#self.buttonLock['bg']=FALSE_COLOR
+			self.locklabel['fg']=BG_framMain
+			for entry in self.Entries:
+				self.Entries[entry]['bg']=ENTRY_COLOR
 		else:
 			self.isfixed=True
 			self.buttonLock['text']='Unlock'
 			self.buttonLock['bg']=TRUE_COLOR
+			self.locklabel['fg']='red'
+			for entry in self.Entries:
+				self.Entries[entry]['bg']=ENTRY_LOCKED_COLOR
 	
 	def approchButton(self):
 		self.now = self.buttonLock['text']
@@ -124,7 +130,10 @@ class interface():
 
 		newEntry = Entry(frame)
 		newEntry['width'] = width
-		newEntry['bg']=ENTRY_COLOR
+		if self.isfixed:
+			newEntry['bg']=ENTRY_LOCKED_COLOR
+		else:
+			newEntry['bg']=ENTRY_COLOR
 		newEntry.insert(0, value)
 		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
 		self.Entries[name]=newEntry
@@ -335,7 +344,7 @@ class interface():
 		newMenu['bg'] = ERROR_COLOR
 		if value.lower() !=  "full" and value.lower() != "roc":
 			print ">> [ERROR] "+label+" '"+name+"' has wrong value '"+value+"'"
-			print ">>         Please select the type to fix it" 
+			print ">>         Please select the type to fix it"
 			var.set("ERROR")
 		elif value=="Full":
 			newMenu['bg'] = MENU_FULL_COLOR
@@ -350,6 +359,9 @@ class interface():
 		self.Menu[name]=newMenu
 
 	def chooseType(self, menu, label, selction, option, var):
+		if self.isfixed:
+			print '>> [INFO] The menu is locked!'
+			return
 		value = self.iniClass.Sections[selction][option]
 		if value != label:
 			print ">> [INFO] Change %s : %s : %s -> %s "%(selction, option, value, label)
@@ -377,7 +389,7 @@ class interface():
 		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=1, font=('helvetica', 12), sticky='ew')
 
 		self.entryConfig = Entry(self.master)
-		self.entryConfig["width"]=35
+		self.entryConfig["width"]=15
 		self.entryConfig.insert(0, self.loadConfig)
 		self.entryConfig.grid(row=mainRow, column=2, columnspan=2, sticky='ew' )
 		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig))
@@ -385,7 +397,7 @@ class interface():
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=('helvetica', 12, 'bold'))
 		self.buttonReload["text"]="ReLoad"
-		self.buttonReload.grid(row=mainRow, column=COLUMNMAX-5, sticky=EW)
+		self.buttonReload.grid(row=mainRow, column=4, sticky=EW)
 	
 		self.buttonLock = Button(self.master, font=('helvetica', 12,'bold'), command=self.lock)
 		if self.isfixed == True:
@@ -395,11 +407,16 @@ class interface():
 			self.buttonLock["text"]="Lock"
 			self.buttonLock["bg"]=QUIT_COLOR
 			#self.buttonLock["bg"]=FALSE_COLOR
-		self.buttonLock.grid(row=mainRow, column=COLUMNMAX-4, sticky=EW)
+		self.buttonLock.grid(row=mainRow, column=5, sticky=EW)
 
 		self.buttonNext = Button(self.master, bg=PREVIEW_COLOR, font=('helvetica', 12,'bold'))
 		self.buttonNext["text"]="Next"
-		self.buttonNext.grid(row=mainRow, column=COLUMNMAX-3, sticky=EW)
+		self.buttonNext.grid(row=mainRow, column=6, sticky=EW)
+
+		self.locklabel = Label(self.master, bg=BG_framMain, font=('helvetica', 15, 'bold'), fg='red' )
+		self.locklabel["text"]="Locked!"
+		self.locklabel.grid(row=mainRow, column=7, sticky=EW )
+
 
 		# Pad 
 		mainRow+=1
