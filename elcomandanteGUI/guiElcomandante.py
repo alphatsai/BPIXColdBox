@@ -136,9 +136,11 @@ class interface():
 		return
 
 	def ConfirmChangeOpt(self, entry, section, option):
-		value=entry.get()
-		print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, self.iniClass.Sections[section][option], value)
-		self.iniClass.changeOptValue(section,option, value)
+		value = self.iniClass.Sections[section][option]
+		newvalue = entry.get()
+		if value != newvalue:
+			print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, value, newvalue)
+			self.iniClass.changeOptValue(section,option, newvalue)
 		entry['bg']=ENTRY_COLOR
 		return
 
