@@ -9,6 +9,9 @@ sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
 from readConfg import elComandante_ini
 from readConfg import elComandante_conf
 
+ISFIXED=False
+#ISFIXED=True
+
 Delay_MAX=8 #sec
 CYCLE_MAX=20
 COLUMNMAX=9
@@ -93,7 +96,7 @@ class interface():
 		self.Labels[term1+term2+name1]=newLabel
 		return
 
-	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, byTyping=True ):
+	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1 ):
 		term1=""
 		term2=""
 		if label!="" :
@@ -110,19 +113,19 @@ class interface():
 		self.Entries[name]=newEntry
 		return name
 
-	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, byTyping=True ):
-		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan, byTyping)
+	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, isFixed=False ):
+		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan)
 		newEntry = self.Entries[name]
-		if byTyping:
+		if not isFixed:
 			newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry))
 			newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
 			newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
 			newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
 		else:
-			newEntry.bind('<Key>', lambda event:self.unTouch(newEntry, value))
-			newEntry.bind('<Leave>', lambda event:self.unTouch(newEntry, value))
-			newEntry.bind('<Return>', lambda event:self.unTouch(newEntry, value))
-			newEntry.bind('<FocusOut>', lambda event:self.unTouch(newEntry, value))
+			newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, value, True))
+			newEntry.bind('<Leave>', lambda event:self.unTouchEntry(newEntry, value))
+			newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, value, True))
+			newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, value))
 		self.Entries[name]=newEntry
 		return
 
@@ -144,12 +147,14 @@ class interface():
 		entry['bg']=ENTRY_COLOR
 		return
 
-	def unTouch(self, entry, value):
+	def unTouchEntry(self, entry, value, murmur=False ):
+		if murmur:
+			print '>> [INFO] The entry is fixed!'
 		entry.delete(0, END)
 		entry.insert(0, value)
 		return	
 
-	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=5):
+	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=5, isFixed=False):
 		term1=""
 		term2=""
 		if label!="" :
@@ -162,7 +167,7 @@ class interface():
 		newButton['width'] =width
 		newButton['text']="OFF"
 		newButton['bg']=FALSE_COLOR
-		newButton['command']=lambda:self.changeBool( name, name0, name1 )
+		newButton['command']=lambda:self.changeBool( name, name0, name1, isFixed )
 		if value.lower() !=  "true" and value.lower() != "false":
 			print ">> [ERROR] "+name0+" '"+name1+"' has wrong value '"+value+"'"
 			print ">>         Please click the button to fix it" 
@@ -173,9 +178,12 @@ class interface():
 			newButton['bg']=TRUE_COLOR
 		newButton.grid( row=row, column=column, sticky=sticky)
 		self.BoolButtons[name]=newButton
-		return
 	
-	def changeBool(self, name, selction, option):
+	def changeBool(self, name, selction, option, isFixed):
+		if isFixed:
+			print '>> [INFO] The button is fixed!'
+			return
+			
 		if self.BoolButtons[name]['text'] == "OFF":
 			print ">> [INFO] Change %s : %s : False -> True "%(selction, option)
 			self.BoolButtons[name]['text']="ON"
@@ -205,7 +213,7 @@ class interface():
 		self.testButtons[name]=newButton
 		return
 
-	def addDelayMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=Delay_MAX, sticky='wn', width=10):
+	def addDelayMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=Delay_MAX, sticky='wn', width=10, isFixed=False):
 		term1=""
 		term2=""
 		if label!="" :
@@ -229,11 +237,15 @@ class interface():
 		newMenu['menu'].delete(0)
 		sec=1.
 		while ( sec <= nmax ):
-			newMenu['menu'].add_command(label=str(int(sec))+' Sec.', command=lambda sec=sec:self.chooseDelay( newMenu, sec, name0, name1, var))
+			newMenu['menu'].add_command(label=str(int(sec))+' Sec.',command=lambda sec=sec:self.chooseDelay( newMenu, sec, name0, name1, var, isFixed))
 			sec+=1
 		self.Menu[name]=newMenu
 
-	def chooseDelay(self, menu, sec, selction, option, var):
+	def chooseDelay(self, menu, sec, selction, option, var, isFixed=False):
+		if isFixed:
+			print '>> [INFO] The menu is fixed!'
+			return
+
 		value = self.iniClass.Sections[selction][option]
 		if float(value)*2 != sec:
 			print ">> [INFO] Change %s : %s : %s(%2.0f sec) -> %s(%2.0f sec) "%(selction, option, value, float(value)*2, str(sec/2), sec)
@@ -242,7 +254,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option, str(sec/2))
 		return
 
-	def addnCycleMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=CYCLE_MAX, sticky='wn', width=10):
+	def addnCycleMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=CYCLE_MAX, sticky='wn', width=10, isFixed=False):
 		term1=""
 		term2=""
 		if label!="" :
@@ -266,11 +278,14 @@ class interface():
 		newMenu['menu'].delete(0)
 		ilabel=1
 		while ( ilabel <= nmax ):
-			newMenu['menu'].add_command(label=str(ilabel),command=lambda ilabel=ilabel:self.chooseCycle(newMenu,str(ilabel),name0,name1,var))
+			newMenu['menu'].add_command(label=str(ilabel),command=lambda ilabel=ilabel:self.chooseCycle(newMenu,str(ilabel),name0,name1,var,isFixed))
 			ilabel+=1
 		self.Menu[name]=newMenu
 
-	def chooseCycle(self, menu, label, selction, option, var):
+	def chooseCycle(self, menu, label, selction, option, var, isFixed=False):
+		if isFixed:
+			print '>> [INFO] The menu is fixed!'
+			return
 		value = self.iniClass.Sections[selction][option]
 		if value != label:
 			print ">> [INFO] Change %s : %s : %s -> %s "%(selction, option, value, label)
@@ -420,9 +435,9 @@ class interface():
 			irow+=1
 			value=self.iniClass.Sections['CoolingBox'][opt]
 			if opt == 'CoolingBoxUse':
-				self.addBoolButton(label='Main_Setup',name0='CoolingBox',name1=opt,frame=self.CoolingBox,row=irow,value=value,sticky='n')
+				self.addBoolButton(label='Main_Setup',name0='CoolingBox',name1=opt,frame=self.CoolingBox,row=irow,value=value,sticky='n', isFixed=ISFIXED)
 			else:
-				self.addOptEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow, isFixed=ISFIXED)
 			irow+=1
 
 		self.Keithley = Frame( self.master, bg=BG_framMain)
@@ -434,9 +449,9 @@ class interface():
 			irow+=1
 			value=self.iniClass.Sections['Keithley'][opt]
 			if opt == 'KeithleyUse':
-				self.addBoolButton(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, row=irow, value=value, sticky='n')
+				self.addBoolButton(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, row=irow, value=value, sticky='n', isFixed=ISFIXED)
 			else:
-				self.addOptEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow, isFixed=ISFIXED)
 			irow+=1
 
 		self.LowVoltage = Frame( self.master, bg=BG_framMain)
@@ -448,9 +463,9 @@ class interface():
 			irow+=1
 			value=self.iniClass.Sections['LowVoltage'][opt]
 			if opt == 'LowVoltageUse':
-				self.addBoolButton(label='Main_Setup',name0='LowVoltage',name1=opt,frame=self.LowVoltage,row=irow,value=value,sticky='n')
+				self.addBoolButton(label='Main_Setup',name0='LowVoltage',name1=opt,frame=self.LowVoltage,row=irow,value=value,sticky='n', isFixed=ISFIXED)
 			else:
-				self.addOptEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow, isFixed=ISFIXED)
 			irow+=1
 
 		self.Xray = Frame( self.master, bg=BG_framMain)
@@ -462,9 +477,9 @@ class interface():
 			irow+=1
 			value=self.iniClass.Sections['Xray'][opt]
 			if opt == 'XrayUse':
-				self.addBoolButton(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow, value=value, sticky='n')
+				self.addBoolButton(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow, value=value, sticky='n', isFixed=ISFIXED)
 			else:
-				self.addOptEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow)
+				self.addOptEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow, isFixed=ISFIXED)
 			irow+=1
 
 		# Process = ['Cycle', 'IV', 'Tests', 'OperationDetails']
@@ -483,10 +498,10 @@ class interface():
 			value=self.iniClass.Sections['Cycle'][opt]
 			if opt == 'nCycles':
 				self.addLabel(label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, row=0, column=icol)
-				self.addnCycleMenu( label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol)
+				self.addnCycleMenu( label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol, isFixed=ISFIXED)
 			else:
 				self.addLabel(label='Main_Process', name0='Cycle', name1=opt+u" (\N{DEGREE SIGN}C)", frame=self.Process, row=0, column=icol)
-				self.addOptEntry(label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol )
+				self.addOptEntry(label='Main_Process', name0='Cycle', name1=opt, frame=self.Process, value=value, row=irow, column=icol, isFixed=ISFIXED )
 			icol+=1
 		irow+=2
 
@@ -496,10 +511,10 @@ class interface():
 			value=self.iniClass.Sections['IV'][opt]
 			if opt == 'Delay':
 				self.addLabel(label='Main_Process', name0='IV', name1=opt, frame=self.Process, row=irow-1, column=icol)
-				self.addDelayMenu( label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol)
+				self.addDelayMenu( label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol, isFixed=ISFIXED)
 			else:
 				self.addLabel(label='Main_Process', name0='IV', name1=opt+' (Volt)', frame=self.Process, row=irow-1, column=icol)
-				self.addOptEntry(label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol )
+				self.addOptEntry(label='Main_Process', name0='IV', name1=opt, frame=self.Process, value=value, row=irow, column=icol, isFixed=ISFIXED )
 			icol+=1
 		irow+=1
 
@@ -507,7 +522,7 @@ class interface():
 			self.addLabel(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, row=irow, font=('helvetica', 12,))
 			value=self.iniClass.Sections['Tests'][opt]
 			if opt == 'Test':
-				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, width=20, columnspan=6, byTyping=False)
+				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, width=20, columnspan=6, isFixed=True)
 				irow+=1
 				self.addLabel(label='Main_Process', name0='Tests', name1='Options', frame=self.Process, row=irow, rowspan=2, sticky='ns', font=('helvetica', 12,))
 				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Process, row=irow, column=1, sticky='ew')
@@ -521,11 +536,11 @@ class interface():
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, sticky='ew', column=3 )
 				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
 			elif opt == 'TestDescription':
-				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, columnspan=4)
+				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, columnspan=4, isFixed=ISFIXED)
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Process, row=irow, column=5 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Clear', frame=self.Process, row=irow, column=6 )
 			else:
-				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1)
+				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, isFixed=ISFIXED)
 			irow+=1
 	
 		# Pad 
