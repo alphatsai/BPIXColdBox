@@ -9,6 +9,7 @@ sys.path.insert(1,os.path.dirname(os.path.abspath(__file__))+'/../')
 from readConfg import elComandante_ini
 from readConfg import elComandante_conf
 
+COLUMNMAX=9
 BG_framTitle='Gray'
 BG_framConfig='LightBlue1'
 BG_framMain='wheat1'
@@ -24,13 +25,13 @@ class interface():
 		self.master = master
 		self.master.title("guiElcomandante")
 		self.master["bg"]=BG_framMain
-		self.framMain =  self.master
-		self.framMain.grid()
+		self.master.grid()
 		self.iniClass = None
 		self.nSections = 0
 		self.Labels={}
 		self.Entries={}
 		self.BoolButtons={}
+		self.testButtons={}
 		self.MuduelTypeMenu={}
 		self.iniSkipLists = [
 			'Xray',
@@ -52,7 +53,7 @@ class interface():
 		self.loadConfig = config	
 		return
 
-	def addXpad(self, frame, colmax=6, bg=BG_framMain, width=10, height=1, row=0):
+	def addXpad(self, frame, colmax=8, bg=BG_framMain, width=10, height=1, row=0):
 		col=0
 		while ( col < colmax ):
 			pad = Label(frame, bg=bg, width=width, height=height)
@@ -67,7 +68,7 @@ class interface():
 
 	def quit(self):
 		print '>> [INFO] Ciao~ :-D'
-		self.framMain.quit()
+		self.master.quit()
 		return
 
 	def addPreview(self, frame, row=0, column=0, text="Preview", bg=PREVIEW_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
@@ -145,7 +146,24 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,"False")
 		return
 
-	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=8):
+	def addTestButton(self, frame, label="", name0="", name1="", row=0, column=0, sticky='n', width=10, rowspan=1):
+		term1=""
+		term2=""
+		if label!="" :
+			term1=label+"_"
+		if name0!="" :
+			term2=name0+"_"
+		name=term1+term2+name1
+
+		newButton = Button(frame)
+		newButton['width'] =width
+		newButton['text']=name1
+		newButton['bg']=FALSE_COLOR
+		newButton.grid( row=row, column=column, sticky=sticky, rowspan=rowspan)
+		self.testButtons[name]=newButton
+		return
+
+	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=10):
 		term1=""
 		term2=""
 		if label!="" :
@@ -195,54 +213,58 @@ class interface():
 	def createWidgets(self):
 		# Title
 		mainRow=0
-		self.title = Label(self.framMain, bg=BG_framMain, font=('helvetica', 10, 'bold') )
+		self.title = Label(self.master, bg=BG_framMain, font=('helvetica', 10, 'bold') )
 		self.title["text"]="elComandante_ini"
-		self.title.grid(row=mainRow, column=0, columnspan=6, sticky=NSEW )
+		self.title.grid(row=mainRow, column=0, columnspan=COLUMNMAX, sticky=NSEW )
 
 		# Pad 
 		mainRow+=1
-		self.addXpad( self.framMain, row=mainRow)
+		self.addXpad( self.master, row=mainRow)
 
 		# Config 
 		mainRow+=1
-		self.addLabel( label='Main', name1='Input Configure', frame=self.framMain, row=mainRow, column=0, columnspan=2, font=('helvetica', 12))
+		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=1, font=('helvetica', 12))
 
-		self.entryConfig = Entry(self.framMain)
-		self.entryConfig["width"]=30
+		self.entryConfig = Entry(self.master)
+		self.entryConfig["width"]=35
 		self.entryConfig.insert(0, self.loadConfig)
-		self.entryConfig.grid(row=mainRow, column=2, sticky=W, columnspan=2)
+		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='w')
 		
-		self.button1Config = Button(self.framMain, bg="IndianRed2", font=('helvetica', 12, 'bold'))
+		self.button1Config = Button(self.master, bg="IndianRed2", font=('helvetica', 12, 'bold'))
 		self.button1Config["text"]="ReLoad"
-		self.button1Config.grid(row=mainRow, column=4, sticky=E)
+		self.button1Config.grid(row=mainRow, column=5, sticky=E)
 	
-		self.button2Config = Button(self.framMain, bg="SpringGreen2", font=('helvetica', 12,'bold'))
+		self.button2Config = Button(self.master, bg="SpringGreen2", font=('helvetica', 12,'bold'))
 		self.button2Config["text"]="Save"
-		self.button2Config.grid(row=mainRow, column=5)
+		self.button2Config.grid(row=mainRow, column=6)
 		
+		self.button2Config = Button(self.master, bg=PREVIEW_COLOR, font=('helvetica', 12,'bold'))
+		self.button2Config["text"]="Next"
+		self.button2Config.grid(row=mainRow, column=7, sticky='w')
+
 		# Pad 
 		mainRow+=1
-		self.addXpad( self.framMain, row=mainRow)
+		self.addXpad( self.master, row=mainRow)
 
 		# DTB = ['Modules', 'ModuleType', 'TestboardUse']
 		mainRow+=1
-		self.addLabel( label='Main', name1='DTB', frame=self.framMain, row=mainRow, columnspan=6, font=('helvetica', 12,'bold'), sticky='s' )
+		self.addLabel( label='Main', name1='DTB', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=('helvetica', 12,'bold'), sticky='s' )
 		
 
 		mainRow+=1
-		self.modules = Frame( self.framMain, bg=BG_framMain)
-		self.modules.grid( row=mainRow, column=0, columnspan=2, sticky=N+E)
+		self.modules = Frame( self.master, bg=BG_framMain)
+		self.modules.grid( row=mainRow, column=1, columnspan=2, sticky=N)
 		self.addLabel( label='Main_DTB', name1='Modules', frame=self.modules, columnspan=2, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['Modules']:
 			value=self.iniClass.Sections['Modules'][opt]
 			self.addLabel(label='Main_DTB', name0='Modules', name1=opt, frame=self.modules, row=irow )
-			self.addEntry(label='Main_DTB', name0='Modules', name1=opt, frame=self.modules, value=value, row=irow, column=1, width=10)
+			self.addEntry(label='Main_DTB', name0='Modules', name1=opt, frame=self.modules, value=value, row=irow, column=1)
 			irow+=1
 
 
-		self.moduleType = Frame( self.framMain, bg=BG_framMain)
-		self.moduleType.grid( row=mainRow, column=2, columnspan=2, sticky=N)
+		self.moduleType = Frame( self.master, bg=BG_framMain)
+		self.moduleType.grid( row=mainRow, column=3, columnspan=1, sticky=N)
 		self.addLabel( label='Main_DTB', name1='ModuleType', frame=self.moduleType, columnspan=2, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['ModuleType']:
@@ -251,8 +273,8 @@ class interface():
 			self.addMuduelTypeMenu( frame=self.moduleType, label="Main_DTB", name0="ModuleType", name1=opt , row=irow, value=value )
 			irow+=1
 
-		self.TestboardUse = Frame( self.framMain, bg=BG_framMain)
-		self.TestboardUse.grid( row=mainRow, column=4, columnspan=2, sticky=N+W)
+		self.TestboardUse = Frame( self.master, bg=BG_framMain)
+		self.TestboardUse.grid( row=mainRow, column=4, columnspan=3, sticky=N)
 		self.addLabel( label='Main_DTB', name1='TestboardUse', frame=self.TestboardUse, columnspan=2, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['TestboardUse']:
@@ -263,27 +285,26 @@ class interface():
 
 		# Hardware Setting = ['CoolingBox', 'Keithley', 'LowVoltage', 'Xray']
 		mainRow+=1
-		self.addLabel(label='Main', name1='Setup', frame=self.framMain, row=mainRow, columnspan=6, font=('helvetica', 12,'bold'),sticky='s')
-
+		self.addLabel(label='Main', name1='Setup', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=('helvetica', 12,'bold'),sticky='s')
 
 		mainRow+=1
-		self.CoolingBox = Frame( self.framMain, bg=BG_framMain)
-		self.CoolingBox.grid( row=mainRow, column=1, columnspan=1, sticky=N)
-		self.addLabel( label='Main_Setup', name1='CoolingBox', frame=self.CoolingBox, columnspan=2, font=('helvetica', 12,))
+		self.CoolingBox = Frame( self.master, bg=BG_framMain)
+		self.CoolingBox.grid( row=mainRow, column=1, sticky=N)
+		self.addLabel( label='Main_Setup', name1='CoolingBox', frame=self.CoolingBox, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['CoolingBox']:
 			self.addLabel(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, row=irow )
 			irow+=1
 			value=self.iniClass.Sections['CoolingBox'][opt]
 			if opt == 'CoolingBoxUse':
-				self.addBoolButton(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, row=irow, value=value, sticky='n')
+				self.addBoolButton(label='Main_Setup',name0='CoolingBox',name1=opt,frame=self.CoolingBox,row=irow,value=value,sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow, width=10)
+				self.addEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow)
 			irow+=1
 
-		self.Keithley = Frame( self.framMain, bg=BG_framMain)
-		self.Keithley.grid( row=mainRow, column=2, columnspan=1, sticky=N)
-		self.addLabel( label='Main_Setup', name1='Keithley', frame=self.Keithley, columnspan=2, font=('helvetica', 12,))
+		self.Keithley = Frame( self.master, bg=BG_framMain)
+		self.Keithley.grid( row=mainRow, column=2, sticky=N)
+		self.addLabel( label='Main_Setup', name1='Keithley', frame=self.Keithley, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['Keithley']:
 			self.addLabel(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, row=irow )
@@ -292,26 +313,26 @@ class interface():
 			if opt == 'KeithleyUse':
 				self.addBoolButton(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, row=irow, value=value, sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow, width=10)
+				self.addEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow)
 			irow+=1
 
-		self.LowVoltage = Frame( self.framMain, bg=BG_framMain)
-		self.LowVoltage.grid( row=mainRow, column=3, columnspan=1, sticky=N)
-		self.addLabel( label='Main_Setup', name1='LowVoltage', frame=self.LowVoltage, columnspan=2, font=('helvetica', 12,))
+		self.LowVoltage = Frame( self.master, bg=BG_framMain)
+		self.LowVoltage.grid( row=mainRow, column=3, sticky=N)
+		self.addLabel( label='Main_Setup', name1='LowVoltage', frame=self.LowVoltage, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['LowVoltage']:
 			self.addLabel(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, row=irow )
 			irow+=1
 			value=self.iniClass.Sections['LowVoltage'][opt]
 			if opt == 'LowVoltageUse':
-				self.addBoolButton(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, row=irow, value=value, sticky='n')
+				self.addBoolButton(label='Main_Setup',name0='LowVoltage',name1=opt,frame=self.LowVoltage,row=irow,value=value,sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow, width=10)
+				self.addEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow)
 			irow+=1
 
-		self.Xray = Frame( self.framMain, bg=BG_framMain)
-		self.Xray.grid( row=mainRow, column=4, columnspan=1, sticky=N)
-		self.addLabel( label='Main_Setup', name1='Xray', frame=self.Xray, columnspan=2, font=('helvetica', 12,))
+		self.Xray = Frame( self.master, bg=BG_framMain)
+		self.Xray.grid( row=mainRow, column=4, sticky=N)
+		self.addLabel( label='Main_Setup', name1='Xray', frame=self.Xray, font=('helvetica', 12,))
 		irow=1
 		for opt in self.iniClass.list_Default['Xray']:
 			self.addLabel(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow)
@@ -320,21 +341,49 @@ class interface():
 			if opt == 'XrayUse':
 				self.addBoolButton(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow, value=value, sticky='n')
 			else:
-				self.addEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow, width=10)
+				self.addEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow)
 			irow+=1
 
-		# Process = ['Test Trim', 'Tests', 'OperationDetails']
+		# Process = ['Tests', 'OperationDetails']
 		mainRow+=1
-		self.addLabel(label='Main', name1='Process',frame=self.framMain, row=mainRow, columnspan=6, font=('helvetica', 12,'bold'),sticky='s')
+		self.addLabel(label='Main', name1='Process',frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=('helvetica', 12,'bold'),sticky='s')
+
+		mainRow+=1
+		self.Tests = Frame( self.master, bg=BG_framMain)
+		self.Tests.grid( row=mainRow, column=0, sticky=W+N, columnspan=4 )
+		self.addLabel( label='Main_Process', name1='Tests', frame=self.Tests, columnspan=2, font=('helvetica', 12,))
+		irow=1
+		for opt in self.iniClass.list_Default['Tests']:
+			self.addLabel(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, row=irow)
+			value=self.iniClass.Sections['Tests'][opt]
+			if opt == 'Test':
+				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1, width=20, columnspan=3)
+				irow+=1
+				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Tests, row=irow, column=0, sticky='ne' )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@17', frame=self.Tests, row=irow, column=1 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@17', frame=self.Tests, row=irow, column=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Add new test', frame=self.Tests,row=irow,column=3,sticky='wn' )
+				irow+=1
+				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@-20', frame=self.Tests, row=irow, column=0 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@-20', frame=self.Tests, row=irow, column=1 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Tests, row=irow, column=2 )
+				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Tests, value='Ex: IV@10', row=irow, column=3 )
+			elif opt == 'TestDescription':
+				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1)
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Tests, row=irow, column=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Clear', frame=self.Tests, row=irow, column=3 )
+			else:
+				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1)
+			irow+=1
 	
 		# Options 
 		mainRow+=1
-		self.addPreview( self.framMain, row=mainRow, column=4)
-		self.addQUIT( self.framMain, row=mainRow, column=5, sticky='w' )
+		self.addPreview( self.master, row=mainRow, column=4)
+		self.addQUIT( self.master, row=mainRow, column=5, sticky='w' )
 
 		# Pad 
 		mainRow+=1
-		self.addXpad( self.framMain, row=mainRow)
+		self.addXpad( self.master, row=mainRow)
 		return
 
 ####### example ########
