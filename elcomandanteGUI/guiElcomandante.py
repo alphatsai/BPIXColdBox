@@ -79,8 +79,8 @@ class interface():
 			self.buttonLock['text']='Lock'
 		return
 
-	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg=QUIT_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
-		self.QUIT = Button(frame, font=font, bg=bg, text=text, command=self.quit)
+	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg=QUIT_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se', width=5):
+		self.QUIT = Button(frame, font=font, bg=bg, width=width, text=text, command=self.quit)
 		self.QUIT.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 		return
 
@@ -89,8 +89,8 @@ class interface():
 		self.master.quit()
 		return
 
-	def addPreview(self, frame, row=0, column=0, text="Preview", bg=PREVIEW_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
-		self.PREVIEW = Button(frame, font=font, bg=bg, text=text, command=self.printConfig)
+	def addPreview(self, frame, row=0, column=0, text="Preview", bg=PREVIEW_COLOR, font=('helvetica', 12, 'bold'),columnspan=1, sticky='se', width=5):
+		self.PREVIEW = Button(frame, font=font, bg=bg, text=text, width=width, command=self.printConfig)
 		self.PREVIEW.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 		return
 
@@ -98,16 +98,16 @@ class interface():
 		self.iniClass.callConfig()
 		return
 
-	def addSave(self, frame, row=0, column=0, text="Save", bg=SAVE_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
-		self.SAVE = Button(frame, font=font, bg=bg, text=text, command= lambda:self.saveConfig(self.output) )
+	def addSave(self, frame, row=0, column=0, text="Save", bg=SAVE_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se', width=5):
+		self.SAVE = Button(frame, font=font, bg=bg, text=text, width=width, command= lambda:self.saveConfig(self.output) )
 		self.SAVE.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 
 	def saveConfig(self, output=None):
 		self.iniClass.makeConfig(output)
 		return
 
-	def addLabel(self, frame, label="", name0="", name1="", row=0, column=0, sticky='nsew', columnspan=1, rowspan=1, bg=BG_framMain, font=("Arial",10)):
-		newLabel = Label(frame, bg=bg, font=font)
+	def addLabel(self, frame, label="", name0="", name1="", row=0, column=0, sticky='nsew', columnspan=1, rowspan=1, bg=BG_framMain, font=("Arial",10), fg='black'):
+		newLabel = Label(frame, bg=bg, font=font, fg=fg)
 		newLabel["text"] = name1 
 		newLabel.grid( row=row, column=column, sticky=sticky, columnspan=columnspan, rowspan=rowspan )
 		term1=""
@@ -119,7 +119,7 @@ class interface():
 		self.Labels[term1+term2+name1]=newLabel
 		return
 
-	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1 ):
+	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, fg='black' ):
 		term1=""
 		term2=""
 		if label!="" :
@@ -130,6 +130,7 @@ class interface():
 
 		newEntry = Entry(frame)
 		newEntry['width'] = width
+		newEntry['fg'] = fg
 		if self.isfixed:
 			newEntry['bg']=ENTRY_LOCKED_COLOR
 		else:
@@ -540,8 +541,8 @@ class interface():
 		self.addLabel(label='Main', name1='Process',frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=('helvetica', 12,'bold'),sticky='s')
 
 		mainRow+=1
-		self.Process = Frame( self.master, bg=BG_framMain)
-		self.Process.grid( row=mainRow, column=1, sticky=W+N, columnspan=5 )
+		self.Process = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
+		self.Process.grid( row=mainRow, column=1, sticky=W+N, columnspan=6 )
 
 		mainRow+=1
 		irow=1
@@ -602,8 +603,8 @@ class interface():
 
 		# Options 
 		mainRow+=1
-		self.addSave( self.master, row=mainRow, column=COLUMNMAX-4)
-		self.addPreview( self.master, row=mainRow, column=COLUMNMAX-3)
+		self.addSave( self.master, row=mainRow, column=COLUMNMAX-4,sticky='e')
+		self.addPreview( self.master, row=mainRow, column=COLUMNMAX-3, sticky='ew')
 		self.addQUIT( self.master, row=mainRow, column=COLUMNMAX-2, sticky='w' )
 
 		# Pad 
