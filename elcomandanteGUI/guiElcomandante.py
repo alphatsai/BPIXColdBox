@@ -146,7 +146,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,"False")
 		return
 
-	def addTestButton(self, frame, label="", name0="", name1="", row=0, column=0, sticky='n', width=10, rowspan=1):
+	def addTestButton(self, frame, label="", name0="", name1="", row=0, column=0, sticky='n', width=10, rowspan=1, columnspan=1):
 		term1=""
 		term2=""
 		if label!="" :
@@ -159,7 +159,7 @@ class interface():
 		newButton['width'] =width
 		newButton['text']=name1
 		newButton['bg']=FALSE_COLOR
-		newButton.grid( row=row, column=column, sticky=sticky, rowspan=rowspan)
+		newButton.grid( row=row, column=column, sticky=sticky, rowspan=rowspan, columnspan=columnspan)
 		self.testButtons[name]=newButton
 		return
 
@@ -372,22 +372,23 @@ class interface():
 			self.addLabel(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, row=irow)
 			value=self.iniClass.Sections['Tests'][opt]
 			if opt == 'Test':
-				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1, width=20, columnspan=5)
+				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1, width=20, columnspan=6)
 				irow+=1
 				self.addLabel(label='Main_Process', name0='Tests', name1='Options', frame=self.Tests, row=irow, rowspan=2, sticky='ns')
-				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Tests, row=irow, column=1, sticky='ne' )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Tests, row=irow, column=1)
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@17', frame=self.Tests, row=irow, column=2 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@17', frame=self.Tests, row=irow, column=3 )
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Add new test', frame=self.Tests,row=irow,column=4,sticky='wn' )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Cycle', frame=self.Tests,row=irow,column=4,sticky='ns', rowspan=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Add new test', frame=self.Tests,row=irow,column=5, columnspan=2, sticky='we')
 				irow+=1
 				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@-20', frame=self.Tests, row=irow, column=1 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@-20', frame=self.Tests, row=irow, column=2 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Tests, row=irow, column=3 )
-				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Tests, value='Ex: IV@10', row=irow, column=4 )
+				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Tests, value='Ex: IV@10', row=irow, column=5, columnspan=2 )
 			elif opt == 'TestDescription':
-				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1, columnspan=3)
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Tests, row=irow, column=4 )
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Clear', frame=self.Tests, row=irow, column=5 )
+				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1, columnspan=4)
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Tests, row=irow, column=5 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Clear', frame=self.Tests, row=irow, column=6 )
 			else:
 				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Tests, value=value, row=irow, column=1)
 			irow+=1
