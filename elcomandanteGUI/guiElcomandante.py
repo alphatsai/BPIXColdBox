@@ -149,7 +149,7 @@ class interface():
 
 	def unTouchEntry(self, entry, value, murmur=False ):
 		if murmur:
-			print '>> [INFO] The entry is fixed!'
+			print '>> [INFO] The entry is locked!'
 		entry.delete(0, END)
 		entry.insert(0, value)
 		return	
@@ -181,7 +181,7 @@ class interface():
 	
 	def changeBool(self, name, selction, option, isFixed):
 		if isFixed:
-			print '>> [INFO] The button is fixed!'
+			print '>> [INFO] The button is locked!'
 			return
 			
 		if self.BoolButtons[name]['text'] == "OFF":
@@ -243,7 +243,7 @@ class interface():
 
 	def chooseDelay(self, menu, sec, selction, option, var, isFixed=False):
 		if isFixed:
-			print '>> [INFO] The menu is fixed!'
+			print '>> [INFO] The menu is locked!'
 			return
 
 		value = self.iniClass.Sections[selction][option]
@@ -284,7 +284,7 @@ class interface():
 
 	def chooseCycle(self, menu, label, selction, option, var, isFixed=False):
 		if isFixed:
-			print '>> [INFO] The menu is fixed!'
+			print '>> [INFO] The menu is locked!'
 			return
 		value = self.iniClass.Sections[selction][option]
 		if value != label:
