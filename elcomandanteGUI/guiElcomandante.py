@@ -19,8 +19,12 @@ TRUE_COLOR='OliveDrab1'
 FALSE_COLOR='PeachPuff3'
 ERROR_COLOR='DeepPink2'
 PREVIEW_COLOR='CadetBlue2'
+RELOAD_COLOR='IndianRed2'
+SAVE_COLOR='SpringGreen2'
+QUIT_COLOR='IndianRed2'
 MENU_FULL_COLOR='SkyBlue1'
-MENU_ROC_COLOR='MediumPurple1'
+MENU_ROC_COLOR='MediumPurple'
+BYTYPING_COLOR='khaki1'
 
 class interface():
 	def __init__(self, master=None):
@@ -29,6 +33,7 @@ class interface():
 		self.master["bg"]=BG_framMain
 		self.master.grid()
 		self.iniClass = None
+		self.output=None
 		self.Labels={}
 		self.Entries={}
 		self.BoolButtons={}
@@ -49,7 +54,7 @@ class interface():
 			col+=1
 		return
 
-	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg="IndianRed2", font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
+	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg=QUIT_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
 		self.QUIT = Button(frame, font=font, bg=bg, text=text, command=self.quit)
 		self.QUIT.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 		return
@@ -62,10 +67,19 @@ class interface():
 	def addPreview(self, frame, row=0, column=0, text="Preview", bg=PREVIEW_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
 		self.PREVIEW = Button(frame, font=font, bg=bg, text=text, command=self.printConfig)
 		self.PREVIEW.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
+		return
 
 	def printConfig(self):
 		self.iniClass.callConfig()
-		
+		return
+
+	def addSave(self, frame, row=0, column=0, text="Save", bg=SAVE_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se'):
+		self.SAVE = Button(frame, font=font, bg=bg, text=text, command= lambda:self.saveConfig(self.output) )
+		self.SAVE.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
+
+	def saveConfig(self, output=None):
+		self.iniClass.makeConfig(output)
+		return
 
 	def addLabel(self, frame, label="", name0="", name1="", row=0, column=0, sticky='nsew', columnspan=1, rowspan=1, bg=BG_framMain, font=("Arial",10)):
 		newLabel = Label(frame, bg=bg, font=font)
@@ -80,20 +94,33 @@ class interface():
 		self.Labels[term1+term2+name1]=newLabel
 		return
 
-	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1 ):
-		newEntry = Entry(frame)
-		newEntry['width'] = width
-		newEntry['bg']='white smoke'
-		newEntry.insert(0, value)
-		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, byTyping=True ):
 		term1=""
 		term2=""
 		if label!="" :
 			term1=label+"_"
 		if name0!="" :
 			term2=name0+"_"
-		self.Entries[term1+term2+name1]=newEntry
+		name=term1+term2+name1
+
+		newEntry = Entry(frame)
+		newEntry['width'] = width
+		newEntry['bg']='white smoke'
+		newEntry.insert(0, value)
+		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+		if byTyping:
+			newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry))
+		self.Entries[name]=newEntry
 		return
+
+	def chEntryBG(self, entry):
+		entry['bg']=BYTYPING_COLOR
+
+	def getEntry(self, enrty, name, section, option ):
+		print ">> [INFO] Change %s : %s : %s -> %s "%(selction, option, self.iniClass.Sections[section][option], enrty.get())
+		self.iniClass.changeOptValue(selction,option, enrty.get())
+
+
 
 	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=5):
 		term1=""
@@ -279,24 +306,20 @@ class interface():
 
 		# Config 
 		mainRow+=1
-		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=2, font=('helvetica', 12))
+		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=1, font=('helvetica', 12), sticky='ew')
 
 		self.entryConfig = Entry(self.master)
-		self.entryConfig["width"]=35
+		self.entryConfig["width"]=30
 		self.entryConfig.insert(0, self.loadConfig)
-		self.entryConfig.grid(row=mainRow, column=3, columnspan=2 )
+		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky=EW )
 		
-		self.button1Config = Button(self.master, bg="IndianRed2", font=('helvetica', 12, 'bold'))
+		self.button1Config = Button(self.master, bg=RELOAD_COLOR, font=('helvetica', 12, 'bold'))
 		self.button1Config["text"]="ReLoad"
-		self.button1Config.grid(row=mainRow, column=5, sticky=E)
+		self.button1Config.grid(row=mainRow, column=COLUMNMAX-5, sticky=EW)
 	
-		self.button2Config = Button(self.master, bg="SpringGreen2", font=('helvetica', 12,'bold'))
-		self.button2Config["text"]="Save"
-		self.button2Config.grid(row=mainRow, column=6)
-		
 		self.button2Config = Button(self.master, bg=PREVIEW_COLOR, font=('helvetica', 12,'bold'))
 		self.button2Config["text"]="Next"
-		self.button2Config.grid(row=mainRow, column=7, sticky='w')
+		self.button2Config.grid(row=mainRow, column=COLUMNMAX-4, sticky=EW)
 
 		# Pad 
 		mainRow+=1
@@ -455,19 +478,19 @@ class interface():
 			self.addLabel(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, row=irow, font=('helvetica', 12,))
 			value=self.iniClass.Sections['Tests'][opt]
 			if opt == 'Test':
-				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, width=20, columnspan=6)
+				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, width=20, columnspan=6, byTyping=False)
 				irow+=1
 				self.addLabel(label='Main_Process', name0='Tests', name1='Options', frame=self.Process, row=irow, rowspan=2, sticky='ns', font=('helvetica', 12,))
-				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Process, row=irow, column=1)
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@17', frame=self.Process, row=irow, column=2 )
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@17', frame=self.Process, row=irow, column=3 )
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Cycle', frame=self.Process,row=irow,column=4,sticky='ns', rowspan=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@17', frame=self.Process, row=irow, column=1, sticky='ew')
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@17', frame=self.Process, row=irow, sticky='ew', column=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@17', frame=self.Process, row=irow, sticky='ew', column=3 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Cycle', frame=self.Process,row=irow,column=4,sticky='nsew', rowspan=2 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Add new test', frame=self.Process,row=irow,column=5, columnspan=2, sticky='we')
 				irow+=1
-				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@-20', frame=self.Process, row=irow, column=1 )
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@-20', frame=self.Process, row=irow, column=2 )
-				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, column=3 )
-				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Process, value='Ex: IV@10', row=irow, column=5, columnspan=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@-20', frame=self.Process, row=irow, sticky='ew', column=1 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@-20', frame=self.Process, row=irow, sticky='ew', column=2 )
+				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, sticky='ew', column=3 )
+				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
 			elif opt == 'TestDescription':
 				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, columnspan=4)
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Process, row=irow, column=5 )
@@ -476,8 +499,13 @@ class interface():
 				self.addEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1)
 			irow+=1
 	
+		# Pad 
+		mainRow+=1
+		self.addXpad( self.master, row=mainRow)
+
 		# Options 
 		mainRow+=1
+		self.addSave( self.master, row=mainRow, column=COLUMNMAX-4)
 		self.addPreview( self.master, row=mainRow, column=COLUMNMAX-3)
 		self.addQUIT( self.master, row=mainRow, column=COLUMNMAX-2, sticky='w' )
 
