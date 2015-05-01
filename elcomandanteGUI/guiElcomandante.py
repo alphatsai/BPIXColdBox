@@ -289,6 +289,7 @@ class interface():
 						restTests += lTests[i]
 					else:
 						restTests += lTests[i]+','
+					i+=1
 			print ">> [INFO] Delete a test '%s'"%(delTest)
 			print ">>        Changed Tests %s: "%(restTests)
 			return
