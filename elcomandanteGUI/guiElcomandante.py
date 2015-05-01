@@ -277,7 +277,7 @@ class interface():
 			return
 
 		tests = self.Entries['Main_Process_Tests_Test'].get()
-		if button['text'] == 'Delete' and tests !='':
+		if button['text'] == 'Delete':
 			restTests = ''
 			if tests != '':
 				lTests = tests.split(',')
@@ -290,6 +290,8 @@ class interface():
 					else:
 						restTests += lTests[i]+','
 					i+=1
+			else:
+				return
 			self.Entries['Main_Process_Tests_Test'].delete(0,END)
 			self.Entries['Main_Process_Tests_Test'].insert(0, restTests)
 			self.iniClass.changeOptValue('Tests','Test', restTests)
