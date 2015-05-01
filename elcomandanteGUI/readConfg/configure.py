@@ -156,9 +156,9 @@ class configure:
 		print ">> ================== Current %s =================\n"% self.defaultOutput
 		for section in self.list_Sections:
 			print " ["+section+"]"
-			for opt in sorted(self.Sections[section]): 
-				print " "+opt+" : "+self.Sections[section][opt] 
-			print "\n"
+			for opt in sorted(self.Sections[section]):
+				print " "+opt+" : "+self.Sections[section][opt]
+			print ""
 		print ">> ======================================================"
 		print ">> [INFO] DONE!"
 		return
