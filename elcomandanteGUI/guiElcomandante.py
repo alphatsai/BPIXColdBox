@@ -290,6 +290,8 @@ class interface():
 					else:
 						restTests += lTests[i]+','
 					i+=1
+			self.Entries['Main_Process_Tests_Test'].delete(0,END)
+			self.iniClass.changeOptValue('Tests','Test', restTests)
 			print ">> [INFO] Delete a test '%s'"%(delTest)
 			print ">>        Changed Tests %s: "%(restTests)
 			return
