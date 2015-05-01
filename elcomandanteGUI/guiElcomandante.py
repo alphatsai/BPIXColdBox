@@ -27,6 +27,7 @@ ENTRY_COLOR='white smoke'
 ENTRY_LOCKED_COLOR='light grey'
 
 class interface():
+	#### initial parameters
 	def __init__(self, master=None):
 		self.master = master
 		self.master.title("guiElcomandante")
@@ -40,13 +41,15 @@ class interface():
 		self.BoolButtons={}
 		self.testButtons={}
 		self.Menu={}
-
+	
+	#### Load configure file
 	def loadConfig(self, config=""):
 		self.iniClass = elComandante_ini()
 		self.iniClass.getDefault(config)
 		self.loadConfig = config	
 		return
 
+	### Add empty pad for designing 
 	def addXpad(self, frame, colmax=8, bg=BG_framMain, width=10, height=1, row=0):
 		col=0
 		while ( col < colmax ):
@@ -55,6 +58,7 @@ class interface():
 			col+=1
 		return
 
+	### Lock button
 	def lock(self):
 		if self.buttonLock['text'] == 'Unlock':
 			self.isfixed=False
@@ -66,7 +70,8 @@ class interface():
 		else:
 			self.isfixed=True
 			self.buttonLock['text']='Unlock'
-			self.buttonLock['bg']=TRUE_COLOR
+			#self.buttonLock['bg']=TRUE_COLOR
+			self.buttonLock['bg']=PREVIEW_COLOR
 			self.locklabel['fg']='red'
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_LOCKED_COLOR
@@ -79,6 +84,7 @@ class interface():
 			self.buttonLock['text']='Lock'
 		return
 
+	### Quit button
 	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg=QUIT_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se', width=5):
 		self.QUIT = Button(frame, font=font, bg=bg, width=width, text=text, command=self.quit)
 		self.QUIT.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
@@ -89,6 +95,7 @@ class interface():
 		self.master.quit()
 		return
 
+	### Preview button
 	def addPreview(self, frame, row=0, column=0, text="Preview", bg=PREVIEW_COLOR, font=('helvetica', 12, 'bold'),columnspan=1, sticky='se', width=5):
 		self.PREVIEW = Button(frame, font=font, bg=bg, text=text, width=width, command=self.printConfig)
 		self.PREVIEW.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
@@ -98,6 +105,7 @@ class interface():
 		self.iniClass.callConfig()
 		return
 
+	### Save button
 	def addSave(self, frame, row=0, column=0, text="Save", bg=SAVE_COLOR, font=('helvetica', 12, 'bold'), columnspan=1, sticky='se', width=5):
 		self.SAVE = Button(frame, font=font, bg=bg, text=text, width=width, command= lambda:self.saveConfig(self.output) )
 		self.SAVE.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
@@ -106,6 +114,7 @@ class interface():
 		self.iniClass.makeConfig(output)
 		return
 
+	### Add commend label 
 	def addLabel(self, frame, label="", name0="", name1="", row=0, column=0, sticky='nsew', columnspan=1, rowspan=1, bg=BG_framMain, font=("Arial",10), fg='black'):
 		newLabel = Label(frame, bg=bg, font=font, fg=fg)
 		newLabel["text"] = name1 
@@ -119,6 +128,7 @@ class interface():
 		self.Labels[term1+term2+name1]=newLabel
 		return
 
+	### Add commend entry 
 	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, fg='black' ):
 		term1=""
 		term2=""
@@ -140,14 +150,15 @@ class interface():
 		self.Entries[name]=newEntry
 		return name
 
+	### Add entry for options from configure file 
 	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, isFixed=False ):
 		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan)
 		newEntry = self.Entries[name]
 		if isFixed:
-			newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, value, True))
-			newEntry.bind('<Leave>', lambda event:self.unTouchEntry(newEntry, value))
-			newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, value, True))
-			newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, value))
+			newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
+			newEntry.bind('<Leave>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
+			newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
+			newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
 		else:
 			newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry,self.iniClass.Sections[name0][name1] ))
 			newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
@@ -190,6 +201,7 @@ class interface():
 		entry.insert(0, value)
 		return	
 
+	### Add button for bool options from configure file 
 	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=5):
 		term1=""
 		term2=""
@@ -232,6 +244,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,"False")
 		return
 
+	### Add button for Tests options from configure file 
 	def addTestButton(self, frame, label="", name0="", name1="", row=0, column=0, sticky='n', width=10, rowspan=1, columnspan=1):
 		term1=""
 		term2=""
@@ -241,14 +254,69 @@ class interface():
 			term2=name0+"_"
 		name=term1+term2+name1
 
-		newButton = Button(frame)
+		newButton = Button(frame, command=lambda:self.addTest(newButton))
 		newButton['width'] =width
 		newButton['text']=name1
 		newButton['bg']=FALSE_COLOR
 		newButton.grid( row=row, column=column, sticky=sticky, rowspan=rowspan, columnspan=columnspan)
+		newButton.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
+		newButton.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
 		self.testButtons[name]=newButton
 		return
 
+	def addTest(self, button):
+		if self.isfixed:
+			print '>> [INFO] The button is locked!'
+			return
+
+		if button['text'] == 'Clear':
+			self.Entries['Main_Process_Tests_Test'].delete(0,END)
+			self.iniClass.changeOptValue('Tests','Test', '')
+			print ">> [INFO] Clear Tests! "
+			print ">>        Changed Tests : "
+			return
+
+		tests = self.Entries['Main_Process_Tests_Test'].get()
+		if button['text'] == 'Delete':
+			restTests = ''
+			if tests != '':
+				lTests = tests.split(',')
+				nTests = len(lTests)-1
+				delTest = lTests[nTests]
+				i = 0
+				while ( i < nTests ):
+					if i == nTests-1:
+						restTests += lTests[i]
+					else:
+						restTests += lTests[i]+','
+			print ">> [INFO] Delete a test '%s'"%(delTest)
+			print ">>        Changed Tests %s: "%(restTests)
+			return
+
+		newprocess = button['text']
+		if tests ==  '':
+			tests=newprocess
+		else:
+			tests+=','+newprocess
+
+		self.Entries['Main_Process_Tests_Test'].delete(0,END)
+		self.Entries['Main_Process_Tests_Test'].insert(0, tests)
+		self.iniClass.changeOptValue('Tests','Test', tests)
+		print ">> [INFO] Add new process %s "%(newprocess)
+		print ">>        Changed Tests : %s "%(tests)
+		return
+
+	def changeColorTestEntry(self, action):
+		if self.isfixed:
+			return
+
+		if action == 0: #<Button-1>
+			self.Entries['Main_Process_Tests_Test']['bg']=BYTYPING_COLOR
+		elif action == 1: #<Leave>
+			self.Entries['Main_Process_Tests_Test']['bg']=ENTRY_COLOR
+		
+
+	### Add Menu for delay measument IV from configure file 
 	def addDelayMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=Delay_MAX, sticky='wn', width=10):
 		term1=""
 		term2=""
@@ -290,6 +358,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option, str(sec/2))
 		return
 
+	### Add Menu for times of thermal cycle from configure file 
 	def addnCycleMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=CYCLE_MAX, sticky='wn', width=10):
 		term1=""
 		term2=""
@@ -330,6 +399,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,label)
 		return
 
+	### Add Menu for muduel tyes from configure file 
 	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=10):
 		term1=""
 		term2=""
@@ -374,6 +444,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,label)
 		return
 
+	# Main function and platform
 	def createWidgets(self):
 		# Title
 		mainRow=0
@@ -403,11 +474,10 @@ class interface():
 		self.buttonLock = Button(self.master, font=('helvetica', 12,'bold'), command=self.lock)
 		if self.isfixed == True:
 			self.buttonLock["text"]="Unlock"
-			self.buttonLock["bg"]=TRUE_COLOR
+			self.buttonLock["bg"]=PREVIEW_COLOR
 		else:
 			self.buttonLock["text"]="Lock"
 			self.buttonLock["bg"]=QUIT_COLOR
-			#self.buttonLock["bg"]=FALSE_COLOR
 		self.buttonLock.grid(row=mainRow, column=5, sticky=EW)
 
 		self.buttonNext = Button(self.master, bg=PREVIEW_COLOR, font=('helvetica', 12,'bold'))
