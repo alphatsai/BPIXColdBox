@@ -277,7 +277,7 @@ class interface():
 			return
 
 		tests = self.Entries['Main_Process_Tests_Test'].get()
-		if button['text'] == 'Delete':
+		if button['text'] == 'Delete' and tests !='':
 			restTests = ''
 			if tests != '':
 				lTests = tests.split(',')
