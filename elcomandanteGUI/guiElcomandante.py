@@ -16,13 +16,19 @@ COLUMNMAX=9
 BG_framMain='gray93'
 TRUE_COLOR='OliveDrab1'
 FALSE_COLOR='PeachPuff3'
-ERROR_COLOR='DeepPink2'
-PREVIEW_COLOR='CadetBlue2'
+#ERROR_COLOR='DeepPink2'
+ERROR_COLOR='IndianRed2'
+#PREVIEW_COLOR='CadetBlue2'
+PREVIEW_COLOR='medium sea green'
+UNLOCK_COLOR='DarkOrange1'
+LOCK_COLOR='goldenrod1'
 RELOAD_COLOR='IndianRed2'
-SAVE_COLOR='SpringGreen2'
+SAVE_COLOR='goldenrod1'
 QUIT_COLOR='IndianRed2'
-MENU_FULL_COLOR='SkyBlue1'
-MENU_ROC_COLOR='MediumPurple'
+#MENU_FULL_COLOR='SkyBlue1'
+MENU_FULL_COLOR='LightSteelBlue1'
+#MENU_ROC_COLOR='MediumPurple'
+MENU_ROC_COLOR='light slate blue'
 BYTYPING_COLOR='khaki1'
 ENTRY_COLOR='white smoke'
 ENTRY_LOCKED_COLOR='light grey'
@@ -64,15 +70,14 @@ class interface():
 		if self.buttonLock['text'] == 'Unlock':
 			self.isfixed=False
 			self.buttonLock['text']='Lock'
-			self.buttonLock['bg']=QUIT_COLOR
+			self.buttonLock['bg']=LOCK_COLOR
 			self.locklabel['fg']=BG_framMain
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_COLOR
 		else:
 			self.isfixed=True
 			self.buttonLock['text']='Unlock'
-			#self.buttonLock['bg']=TRUE_COLOR
-			self.buttonLock['bg']=PREVIEW_COLOR
+			self.buttonLock['bg']=UNLOCK_COLOR
 			self.locklabel['fg']='red'
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_LOCKED_COLOR
@@ -481,10 +486,10 @@ class interface():
 		self.buttonLock = Button(self.master, font=('helvetica', 12,'bold'), command=self.lock)
 		if self.isfixed == True:
 			self.buttonLock["text"]="Unlock"
-			self.buttonLock["bg"]=PREVIEW_COLOR
+			self.buttonLock["bg"]=UNLOCK_COLOR
 		else:
 			self.buttonLock["text"]="Lock"
-			self.buttonLock["bg"]=QUIT_COLOR
+			self.buttonLock["bg"]=LOCK_COLOR
 		self.buttonLock.grid(row=mainRow, column=5, sticky=EW)
 
 		self.buttonNext = Button(self.master, bg=PREVIEW_COLOR, font=('helvetica', 12,'bold'))
