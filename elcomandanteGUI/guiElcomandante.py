@@ -12,7 +12,8 @@ from readConfg import elComandante_conf
 Delay_MAX=8 #sec
 CYCLE_MAX=20
 COLUMNMAX=9
-BG_framMain='LightCyan3'
+#BG_framMain='LightCyan3'
+BG_framMain='gray93'
 TRUE_COLOR='OliveDrab1'
 FALSE_COLOR='PeachPuff3'
 ERROR_COLOR='DeepPink2'
