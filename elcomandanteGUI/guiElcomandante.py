@@ -528,14 +528,20 @@ class interface():
 		self.addXpad( self.master, row=mainRow)
 
 		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
+		mainRow+=1
+		self.ElIni = Frame( self.master, bg=BG_framMain, relief=RAISED, borderwidth=2 )
+		self.ElIni.grid( row=mainRow, column=0, sticky=N+S+E+W, columnspan=COLUMNMAX )
 
 		### DTB = ['Modules', 'ModuleType', 'TestboardUse']
-		mainRow+=1
-		self.DTB = Frame( self.master, bg=BG_framMain)
-		self.DTB.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
+		# Pad 
+		eliniRow=0
+		self.addXpad( self.ElIni, row=eliniRow)
+
+		eliniRow+=1
+		self.DTB = Frame( self.ElIni, bg=BG_framMain)
+		self.DTB.grid( row=eliniRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		startCol=0
-		mainRow+=1
 		irow=1
 		icol=startCol+1
 		self.addLabel( label='Main_DTB', name1='Modules', frame=self.DTB, font=SECTION_FONT, column=startCol, row=irow, sticky='ew' )
@@ -564,13 +570,13 @@ class interface():
 		self.expendWindow(self.DTB, irow, icol)
 
 		# Pad 
-		mainRow+=1
-		self.addXpad( self.master, row=mainRow)
+		eliniRow+=1
+		self.addXpad( self.ElIni, row=eliniRow)
 
 		### Device = ['CoolingBox', 'Keithley', 'LowVoltage', 'Xray']
-		mainRow+=1
-		self.Device = Frame( self.master, bg=BG_framMain)
-		self.Device.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
+		eliniRow+=1
+		self.Device = Frame( self.ElIni, bg=BG_framMain)
+		self.Device.grid( row=eliniRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		startCol=0
 		self.addLabel( label='Main_Device', name1='CoolingBox', frame=self.Device, font=SECTION_FONT, column=startCol, row=0, sticky='ew' )
@@ -617,15 +623,15 @@ class interface():
 		self.expendWindow(self.Device, 5, icol)
 
 		# Pad 
-		mainRow+=1
-		self.addXpad( self.master, row=mainRow)
+		eliniRow+=1
+		self.addXpad( self.ElIni, row=eliniRow)
 
 		### Process = ['Cycle', 'IV', 'Tests', 'OperationDetails']
-		mainRow+=1
-		self.Process = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
-		self.Process.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
+		eliniRow+=1
+		self.Process = Frame( self.ElIni, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
+		self.Process.grid( row=eliniRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
-		mainRow+=1
+		eliniRow+=1
 		irow=1
 		self.addLabel( label='Main_Process', name1='Cycle', frame=self.Process, font=SECTION_FONT, column=0, row=irow )
 		icol=1
@@ -681,15 +687,15 @@ class interface():
 		self.expendWindow(self.Process, irow, 7)
 
 		# Pad 
-		mainRow+=1
-		self.addXpad( self.master, row=mainRow)
+		eliniRow+=1
+		self.addXpad( self.ElIni, row=eliniRow)
 
 		### Operation = ['Hostname', 'TestCenter', 'Jui-Fa Tsai']
-		mainRow+=1
-		self.Operation = Frame( self.master, bg=BG_framMain)
-		self.Operation.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
+		eliniRow+=1
+		self.Operation = Frame( self.ElIni, bg=BG_framMain)
+		self.Operation.grid( row=eliniRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
-		mainRow+=1
+		eliniRow+=1
 		irow=1
 		icol=1
 		self.addLabel( label='Main_Operation', name1='OperationDetails', frame=self.Operation, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
@@ -700,6 +706,14 @@ class interface():
 			icol+=1
 		irow+=1
 		self.expendWindow(self.Operation, irow, icol)
+
+		# Pad 
+		eliniRow+=1
+		self.addXpad( self.ElIni, row=eliniRow)
+
+		eliniRow+=1
+		self.expendWindow(self.ElIni, eliniRow, COLUMNMAX)
+		### * [END] elComandante_ini * -------------------------------------------------------------------------------------------------------
 
 		# Pad 
 		mainRow+=1
