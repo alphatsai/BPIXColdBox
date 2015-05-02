@@ -574,7 +574,10 @@ class interface():
 
 		### * Configuration * -------------------------------------------------------------------------------------------------------
 		mainRow+=1
-		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
+		if self.isIni:
+			self.addLabel(label='Main', name1='elComandante.ini Input', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
+		elif self.isConf:
+			self.addLabel(label='Main', name1='elComandante.conf Input', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
 
 		self.entryConfig = Entry(self.master)
 		if self.isfixed:
@@ -588,7 +591,7 @@ class interface():
 		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig,self.elcommandate_ini ))
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.reLoadConfig)
-		self.buttonReload["text"]="ReLoad"
+		self.buttonReload["text"]="Load"
 		self.buttonReload.grid(row=mainRow, column=5, sticky=EW)
 	
 		self.buttonLock = Button(self.master, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.lock)
@@ -599,10 +602,6 @@ class interface():
 			self.buttonLock["text"]="Lock"
 			self.buttonLock["bg"]=LOCK_COLOR
 		self.buttonLock.grid(row=mainRow, column=6, sticky=EW)
-
-		#self.buttonNext = Button(self.master, bg=PREVIEW_COLOR, fg=TITLE4_COLOR, font=BUTTON2_FONT)
-		#self.buttonNext["text"]="Next"
-		#self.buttonNext.grid(row=mainRow, column=6, sticky=EW)
 
 		self.locklabel = Label(self.master, bg=BG_framMain, font=('helvetica', 15, 'bold'), fg='red' )
 		self.locklabel["text"]="Locked!"
