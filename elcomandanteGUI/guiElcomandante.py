@@ -482,13 +482,14 @@ class interface():
 	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
 		# Title
-		mainRow=0
-		self.title = Label(self.master, bg=BG_framMain, font=('helvetica', 15, 'bold'), fg=TITLE_COLOR )
-		self.title["text"]="elComandante.ini"
-		self.title.grid(row=mainRow, column=0, columnspan=COLUMNMAX, sticky=NSEW )
+		#mainRow=0
+		#self.title = Label(self.master, bg=BG_framMain, font=('helvetica', 15, 'bold'), fg=TITLE_COLOR )
+		#self.title["text"]="elComandante.ini"
+		#self.title.grid(row=mainRow, column=0, columnspan=COLUMNMAX, sticky=NSEW )
 
 		# Pad 
-		mainRow+=1
+		#mainRow+=1
+		mainRow=0
 		self.addXpad( self.master, row=mainRow)
 
 		### * Configuration * -------------------------------------------------------------------------------------------------------
@@ -498,13 +499,13 @@ class interface():
 		self.entryConfig = Entry(self.master, bg=ENTRY_COLOR)
 		self.entryConfig["width"]=15
 		self.entryConfig.insert(0, self.loadConfig)
-		self.entryConfig.grid(row=mainRow, column=2, columnspan=2, sticky='ew' )
+		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='ew' )
 		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig))
 		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig,self.loadConfig ))
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR)
 		self.buttonReload["text"]="ReLoad"
-		self.buttonReload.grid(row=mainRow, column=4, sticky=EW)
+		self.buttonReload.grid(row=mainRow, column=5, sticky=EW)
 	
 		self.buttonLock = Button(self.master, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.lock)
 		if self.isfixed == True:
@@ -513,11 +514,11 @@ class interface():
 		else:
 			self.buttonLock["text"]="Lock"
 			self.buttonLock["bg"]=LOCK_COLOR
-		self.buttonLock.grid(row=mainRow, column=5, sticky=EW)
+		self.buttonLock.grid(row=mainRow, column=6, sticky=EW)
 
-		self.buttonNext = Button(self.master, bg=PREVIEW_COLOR, fg=TITLE4_COLOR, font=BUTTON2_FONT)
-		self.buttonNext["text"]="Next"
-		self.buttonNext.grid(row=mainRow, column=6, sticky=EW)
+		#self.buttonNext = Button(self.master, bg=PREVIEW_COLOR, fg=TITLE4_COLOR, font=BUTTON2_FONT)
+		#self.buttonNext["text"]="Next"
+		#self.buttonNext.grid(row=mainRow, column=6, sticky=EW)
 
 		self.locklabel = Label(self.master, bg=BG_framMain, font=('helvetica', 15, 'bold'), fg='red' )
 		self.locklabel["text"]="Locked!"
@@ -526,6 +527,14 @@ class interface():
 		# Pad 
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
+
+		mainRow+=1
+		self.buttonIni = Button(self.master, bg=BG_framMain, fg=TITLE4_COLOR, font=BUTTON2_FONT)
+		self.buttonIni["text"]="elComandante.ini"
+		self.buttonIni.grid(row=mainRow, column=0, sticky=EW, columnspan=4)
+		self.buttonConf = Button(self.master, bg=ENTRY_LOCKED_COLOR, fg=TITLE4_COLOR, font=BUTTON2_FONT)
+		self.buttonConf["text"]="elComandante.conf"
+		self.buttonConf.grid(row=mainRow, column=4, sticky=EW, columnspan=5)
 
 		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
 		mainRow+=1
