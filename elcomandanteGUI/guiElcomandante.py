@@ -528,12 +528,9 @@ class interface():
 		self.addXpad( self.master, row=mainRow)
 
 		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
+
 		### DTB = ['Modules', 'ModuleType', 'TestboardUse']
-		#mainRow+=1
-		#self.addLabel( label='Main', name1='DTB', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=TITLE2_FONT, sticky='s', fg=TITLE2_COLOR )
-	
 		mainRow+=1
-		#self.DTB = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
 		self.DTB = Frame( self.master, bg=BG_framMain)
 		self.DTB.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
@@ -571,12 +568,8 @@ class interface():
 		self.addXpad( self.master, row=mainRow)
 
 		### Device = ['CoolingBox', 'Keithley', 'LowVoltage', 'Xray']
-		#mainRow+=1
-		#self.addLabel(label='Main', name1='Device', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=TITLE2_FONT,sticky='s', fg=TITLE2_COLOR)
-
 		mainRow+=1
-		self.Device = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
-		#self.Device = Frame( self.master, bg=BG_framMain)
+		self.Device = Frame( self.master, bg=BG_framMain)
 		self.Device.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		startCol=0
@@ -584,8 +577,6 @@ class interface():
 		self.addLabel( label='Main_Device', name1='Keithley',   frame=self.Device, font=SECTION_FONT, column=startCol+1, row=0, sticky='ew', columnspan=1 )
 		self.addLabel( label='Main_Device', name1='LowVoltage', frame=self.Device, font=SECTION_FONT, column=startCol+2, row=0, sticky='ew' )
 		self.addLabel( label='Main_Device', name1='Xray',       frame=self.Device, font=SECTION_FONT, column=startCol+3, row=0, sticky='ew' )
-		#self.addBoolButton(label='Main_',name0='CoolingBox',name1=opt,frame=self.CoolingBox,row=irow,value=value,sticky='n')
-		#self.addBoolButton( label='Main_Device', name0='CoolingBox', name1=opt, frame=self.Device, value=value, row=irow, column=icol, sticky='ew')
 		irow=1
 		icol=startCol
 		for opt in self.iniClass.list_Default['CoolingBox']:
@@ -600,8 +591,10 @@ class interface():
 			value=self.iniClass.Sections['Keithley'][opt]
 			self.addLabel(label='Main_Device', name0='Keithley', name1=opt, frame=self.Device, row=irow, column=icol, sticky='ew')
 			if opt == 'KeithleyUse':
+				self.addLabel(label='Main_Device', name0='Keithley', name1=opt, frame=self.Device, row=irow, column=icol, sticky='ew')
 				self.addBoolButton( label='Main_Device', name0='Keithley', name1=opt, frame=self.Device, value=value, row=irow+1, column=icol, sticky='ew')
 			else:
+				self.addLabel(label='Main_Device', name0='Keithley', name1=opt+'(Volt)', frame=self.Device, row=irow, column=icol, sticky='ew')
 				self.addOptEntry(label='Main_Device', name0='Keithley', name1=opt, frame=self.Device, value=value, row=irow+1, column=icol, sticky='ew')
 			irow+=2
 		icol+=1
@@ -621,78 +614,13 @@ class interface():
 			self.addBoolButton( label='Main_Device', name0='Xray', name1=opt, frame=self.Device, value=value, row=irow+1, column=icol, sticky='ew')
 			irow+=2
 		icol+=1
-
 		self.expendWindow(self.Device, 5, icol)
-
-		#mainRow+=1
-		#self.CoolingBox = Frame( self.master, bg=BG_framMain)
-		#self.CoolingBox.grid( row=mainRow, column=2, sticky=N)
-		#self.addLabel( label='Main_Setup', name1='CoolingBox', frame=self.CoolingBox, font=SECTION_FONT)
-		#irow=1
-		#for opt in self.iniClass.list_Default['CoolingBox']:
-		#	self.addLabel(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, row=irow )
-		#	irow+=1
-		#	value=self.iniClass.Sections['CoolingBox'][opt]
-		#	if opt == 'CoolingBoxUse':
-		#		self.addBoolButton(label='Main_Setup',name0='CoolingBox',name1=opt,frame=self.CoolingBox,row=irow,value=value,sticky='n')
-		#	else:
-		#		self.addOptEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow)
-		#	irow+=1
-		#self.expendWindow(self.CoolingBox, irow, 1)
-
-		#self.Keithley = Frame( self.master, bg=BG_framMain)
-		#self.Keithley.grid( row=mainRow, column=3, sticky=N)
-		#self.addLabel( label='Main_Setup', name1='Keithley', frame=self.Keithley, font=SECTION_FONT)
-		#irow=1
-		#for opt in self.iniClass.list_Default['Keithley']:
-		#	self.addLabel(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, row=irow )
-		#	irow+=1
-		#	value=self.iniClass.Sections['Keithley'][opt]
-		#	if opt == 'KeithleyUse':
-		#		self.addBoolButton(label='Main_Setup',name0='Keithley', name1=opt, frame=self.Keithley, row=irow, value=value, sticky='n')
-		#	else:
-		#		self.addOptEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow)
-		#	irow+=1
-		#self.expendWindow(self.Keithley, irow, 1)
-
-		#self.LowVoltage = Frame( self.master, bg=BG_framMain)
-		#self.LowVoltage.grid( row=mainRow, column=4, sticky=N)
-		#self.addLabel( label='Main_Setup', name1='LowVoltage', frame=self.LowVoltage, font=SECTION_FONT)
-		#irow=1
-		#for opt in self.iniClass.list_Default['LowVoltage']:
-		#	self.addLabel(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, row=irow )
-		#	irow+=1
-		#	value=self.iniClass.Sections['LowVoltage'][opt]
-		#	if opt == 'LowVoltageUse':
-		#		self.addBoolButton(label='Main_Setup',name0='LowVoltage',name1=opt,frame=self.LowVoltage,row=irow,value=value,sticky='n')
-		#	else:
-		#		self.addOptEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow)
-		#	irow+=1
-		#self.expendWindow(self.LowVoltage, irow, 1)
-
-		#self.Xray = Frame( self.master, bg=BG_framMain)
-		#self.Xray.grid( row=mainRow, column=5, sticky=N)
-		#self.addLabel( label='Main_Setup', name1='Xray', frame=self.Xray, font=SECTION_FONT)
-		#irow=1
-		#for opt in self.iniClass.list_Default['Xray']:
-		#	self.addLabel(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow)
-		#	irow+=1
-		#	value=self.iniClass.Sections['Xray'][opt]
-		#	if opt == 'XrayUse':
-		#		self.addBoolButton(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, row=irow, value=value, sticky='n')
-		#	else:
-		#		self.addOptEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow)
-		#	irow+=1
-		#self.expendWindow(self.Xray, irow, 1)
 
 		# Pad 
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
 
-		# Process = ['Cycle', 'IV', 'Tests', 'OperationDetails']
-		#mainRow+=1
-		#self.addLabel(label='Main', name1='Process',frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=TITLE2_FONT,sticky='s', fg=TITLE2_COLOR)
-
+		### Process = ['Cycle', 'IV', 'Tests', 'OperationDetails']
 		mainRow+=1
 		self.Process = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
 		self.Process.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
