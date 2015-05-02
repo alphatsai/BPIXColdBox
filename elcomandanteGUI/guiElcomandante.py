@@ -679,6 +679,28 @@ class interface():
 			irow+=1
 	
 		self.expendWindow(self.Process, irow, 7)
+
+		# Pad 
+		mainRow+=1
+		self.addXpad( self.master, row=mainRow)
+
+		### Operation = ['Hostname', 'TestCenter', 'Jui-Fa Tsai']
+		mainRow+=1
+		self.Operation = Frame( self.master, bg=BG_framMain)
+		self.Operation.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		mainRow+=1
+		irow=1
+		icol=1
+		self.addLabel( label='Main_Operation', name1='OperationDetails', frame=self.Operation, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
+		for opt in self.iniClass.list_Default['OperationDetails']:
+			value=self.iniClass.Sections['OperationDetails'][opt]
+			self.addLabel(label='Main_Operation', name0='OperationDetails', name1=opt, frame=self.Operation, row=irow-1, column=icol, sticky='ew')
+			self.addOptEntry(label='Main_Operation', name0='OperationDetails', name1=opt, frame=self.Operation, value=value, row=irow, column=icol, sticky='ew')
+			icol+=1
+		irow+=1
+		self.expendWindow(self.Operation, irow, icol)
+
 		# Pad 
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
