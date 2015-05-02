@@ -45,19 +45,33 @@ class interface():
 		self.master["bg"]=BG_framMain
 		self.master.grid()
 		self.isfixed=True
+		self.isIni=True
+		self.isConf=False
+		self.isfixed=True
 		self.iniClass = None
+		self.confClass = None
 		self.output=None
 		self.Labels={}
 		self.Entries={}
+		self.OptEntries={}
 		self.BoolButtons={}
 		self.testButtons={}
 		self.Menu={}
+		self.Var={}
+		self.elcommandate_ini='./elComandante.ini.default'
+		self.elcommandate_conf='./elComandante.conf.default'
+		self.loadElcommandateIni();
+		self.loadElcommandateConf();
 	
 	#### Load configure file
-	def loadConfig(self, config=""):
+	def loadElcommandateIni(self):
 		self.iniClass = elComandante_ini()
-		self.iniClass.getDefault(config)
-		self.loadConfig = config	
+		self.iniClass.getDefault(self.elcommandate_ini)
+		return
+
+	def loadElcommandateConf(self):
+		self.confClass = elComandante_conf()
+		self.confClass.getDefault(self.elcommandate_conf)
 		return
 
 	### Add empty pad for designing 
@@ -69,6 +83,51 @@ class interface():
 			col+=1
 		return
 
+	### Change elcommandate.ini and elcommandate.conf
+
+
+	### ReLoad button
+	def reLoadConfig(self):
+		if self.isfixed:
+			print '>> [INFO] The button is locked!'
+			return
+		if self.isIni:
+			if os.path.isfile( self.entryConfig.get() ):
+				self.elcommandate_ini = self.entryConfig.get()
+				self.loadElcommandateIni()
+				# refresh option entries
+				for name in self.OptEntries:
+					entry = self.OptEntries[name]
+					section = name.split('_')[2]
+					option = name.split('_')[3]
+					entry.delete(0, END)
+					entry.insert(0, self.iniClass.Sections[section][option])
+				# refresh BoolButtons 
+				for name in self.BoolButtons:
+					button = self.BoolButtons[name]
+					section = name.split('_')[2]
+					option = name.split('_')[3]
+					self.fillBoolName(button, section, option, self.iniClass.Sections[section][option])
+				# refresh menu 
+				for name in self.Menu:
+					menu = self.Menu[name]
+					var = self.Var[name]
+					section = name.split('_')[2]
+					option = name.split('_')[3]
+					if section == 'IV':
+						self.setDelayVar( menu, var, section, option, self.iniClass.Sections[section][option])
+					elif section == 'Cycle':
+						self.setCycleVar( menu, var, section, option, self.iniClass.Sections[section][option])
+					elif section == 'ModuleType':
+						self.setTypeVar( menu, var, section, option, self.iniClass.Sections[section][option])
+			else:
+				print ">> [ERROR] Can't find '%s'"% self.entryConfig.get()
+				return
+
+		self.lock()
+		self.isfixed=True
+
+
 	### Lock button
 	def lock(self):
 		if self.buttonLock['text'] == 'Unlock':
@@ -76,6 +135,7 @@ class interface():
 			self.buttonLock['text']='Lock'
 			self.buttonLock['bg']=LOCK_COLOR
 			self.locklabel['fg']=BG_framMain
+			self.entryConfig['bg']=ENTRY_COLOR
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_COLOR
 		else:
@@ -83,6 +143,7 @@ class interface():
 			self.buttonLock['text']='Unlock'
 			self.buttonLock['bg']=UNLOCK_COLOR
 			self.locklabel['fg']='red'
+			self.entryConfig['bg']=ENTRY_LOCKED_COLOR
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_LOCKED_COLOR
 	
@@ -175,6 +236,7 @@ class interface():
 			newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
 			newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
 		self.Entries[name]=newEntry
+		self.OptEntries[name]=newEntry
 		return
 
 	def chEntryBG(self, entry, value, murmur=True):
@@ -223,22 +285,26 @@ class interface():
 
 		newButton = Button(frame)
 		newButton['width'] =width
-		newButton['text']="OFF"
-		newButton['bg']=FALSE_COLOR
 		newButton['fg']=TITLE4_COLOR
 		newButton['font']=BUTTON_FONT
 		newButton['command']=lambda:self.changeBool( name, name0, name1 )
-		if value.lower() !=  "true" and value.lower() != "false":
-			print ">> [ERROR] "+name0+" '"+name1+"' has wrong value '"+value+"'"
-			print ">>         Please click the button to fix it" 
-			newButton['text']='ERROR'
-			newButton['bg']=ERROR_COLOR
-		elif value == "True":
-			newButton['text']="ON"
-			newButton['bg']=TRUE_COLOR
+		self.fillBoolName(newButton, name0, name1, value)
 		newButton.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
 		self.BoolButtons[name]=newButton
-	
+
+	def fillBoolName(self, button, section, option, value):
+		button['text']="OFF"
+		button['bg']=FALSE_COLOR
+		if value.lower() !=  "true" and value.lower() != "false":
+			print ">> [ERROR] "+section+" '"+option+"' has wrong value '"+value+"'"
+			print ">>         Please click the button to fix it" 
+			button['text']='ERROR'
+			button['bg']=ERROR_COLOR
+		elif value == "True":
+			button['text']="ON"
+			button['bg']=TRUE_COLOR
+		return
+
 	def changeBool(self, name, selction, option):
 		if self.isfixed:
 			print '>> [INFO] The button is locked!'
@@ -349,23 +415,27 @@ class interface():
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
-		newMenu['bg'] = ERROR_COLOR
-		newMenu['fg']=TITLE4_COLOR
-		newMenu['font']=BUTTON_FONT
-		if not value.isdigit():
-			print ">> [ERROR] "+label+" '"+name+"' has wrong value '"+value+"'"
-			print ">>         Please select the number to fix it" 
-			var.set("ERROR")
-		else:
-			newMenu['bg'] = MENU_FULL_COLOR
-			var.set(str(int(float(value)*2))+' Sec.')
+		self.setDelayVar(newMenu, var, name0, name1, value)
 		newMenu.grid( row=row, column=column, sticky=sticky)
-		newMenu['menu'].delete(0)
 		sec=1.
 		while ( sec <= nmax ):
 			newMenu['menu'].add_command(label=str(int(sec))+' Sec.',command=lambda sec=sec:self.chooseDelay( newMenu, sec, name0, name1, var))
 			sec+=1
 		self.Menu[name]=newMenu
+		self.Var[name]=var
+	
+	def setDelayVar(self, menu, var, section, option, value):
+		menu['bg'] = ERROR_COLOR
+		menu['fg']=TITLE4_COLOR
+		menu['font']=BUTTON_FONT
+		if not value.isdigit():
+			print ">> [ERROR] "+section+" '"+option+"' has wrong value '"+value+"'"
+			print ">>         Please select the number to fix it" 
+			var.set("ERROR")
+		else:
+			menu['bg'] = MENU_FULL_COLOR
+			var.set(str(int(float(value)*2))+' Sec.')
+		menu['menu'].delete(0)
 
 	def chooseDelay(self, menu, sec, selction, option, var):
 		if self.isfixed:
@@ -393,23 +463,28 @@ class interface():
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
-		newMenu['bg'] = ERROR_COLOR
-		newMenu['fg']=TITLE4_COLOR
-		newMenu['font']=BUTTON_FONT
-		if not value.isdigit():
-			print ">> [ERROR] "+label+" '"+name+"' has wrong value '"+value+"'"
-			print ">>         Please select the number to fix it" 
-			var.set("ERROR")
-		else:
-			newMenu['bg'] = MENU_FULL_COLOR
-			var.set(str(int(value)))
+		self.setCycleVar(newMenu, var, name0, name1, value)
 		newMenu.grid( row=row, column=column, sticky=sticky)
-		newMenu['menu'].delete(0)
 		ilabel=1
 		while ( ilabel <= nmax ):
 			newMenu['menu'].add_command(label=str(ilabel),command=lambda ilabel=ilabel:self.chooseCycle(newMenu,str(ilabel),name0,name1,var))
 			ilabel+=1
 		self.Menu[name]=newMenu
+		self.Var[name]=var
+
+	def setCycleVar(self, menu, var, section, option, value):
+		menu['bg'] = ERROR_COLOR
+		menu['fg']=TITLE4_COLOR
+		menu['font']=BUTTON_FONT
+		if not value.isdigit():
+			print ">> [ERROR] "+section+" '"+option+"' has wrong value '"+value+"'"
+			print ">>         Please select the number to fix it" 
+			var.set("ERROR")
+		else:
+			menu['bg'] = MENU_FULL_COLOR
+			var.set(str(int(value)))
+		menu['menu'].delete(0)
+		return
 
 	def chooseCycle(self, menu, label, selction, option, var):
 		if self.isfixed:
@@ -436,24 +511,29 @@ class interface():
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
-		newMenu['bg'] = ERROR_COLOR
-		newMenu['fg']=TITLE4_COLOR
-		newMenu['font']=BUTTON_FONT
-		if value.lower() !=  "full" and value.lower() != "roc":
-			print ">> [ERROR] "+label+" '"+name+"' has wrong value '"+value+"'"
-			print ">>         Please select the type to fix it"
-			var.set("ERROR")
-		elif value=="Full":
-			newMenu['bg'] = MENU_FULL_COLOR
-			var.set(value)
-		elif value=="Roc":
-			newMenu['bg'] = MENU_ROC_COLOR
-			var.set(value)
+		self.setTypeVar( newMenu, var, name0, name1, value)
 		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
-		newMenu['menu'].delete(0)
 		newMenu['menu'].add_command( label="Full", command=lambda:self.chooseType( newMenu, 'Full', name0, name1, var))
 		newMenu['menu'].add_command( label="Roc",  command=lambda:self.chooseType( newMenu, 'Roc', name0, name1, var,))
 		self.Menu[name]=newMenu
+		self.Var[name]=var
+	
+	def setTypeVar(self, menu, var, section, option, value):
+		menu['bg'] = ERROR_COLOR
+		menu['fg']=TITLE4_COLOR
+		menu['font']=BUTTON_FONT
+		if value.lower() !=  "full" and value.lower() != "roc":
+			print ">> [ERROR] "+section+" '"+option+"' has wrong value '"+value+"'"
+			print ">>         Please select the type to fix it"
+			var.set("ERROR")
+		elif value=="Full":
+			menu['bg'] = MENU_FULL_COLOR
+			var.set(value)
+		elif value=="Roc":
+			menu['bg'] = MENU_ROC_COLOR
+			var.set(value)
+		menu['menu'].delete(0)
+		return
 
 	def chooseType(self, menu, label, selction, option, var):
 		if self.isfixed:
@@ -496,14 +576,18 @@ class interface():
 		mainRow+=1
 		self.addLabel(label='Main', name1='Input Configure', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
 
-		self.entryConfig = Entry(self.master, bg=ENTRY_COLOR)
+		self.entryConfig = Entry(self.master)
+		if self.isfixed:
+			self.entryConfig["bg"]=ENTRY_LOCKED_COLOR
+		else:
+			self.entryConfig["bg"]=ENTRY_COLOR
 		self.entryConfig["width"]=15
-		self.entryConfig.insert(0, self.loadConfig)
+		self.entryConfig.insert(0, self.elcommandate_ini)
 		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='ew' )
-		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig))
-		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig,self.loadConfig ))
+		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig, self.elcommandate_ini))
+		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig,self.elcommandate_ini ))
 
-		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR)
+		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.reLoadConfig)
 		self.buttonReload["text"]="ReLoad"
 		self.buttonReload.grid(row=mainRow, column=5, sticky=EW)
 	
@@ -532,7 +616,7 @@ class interface():
 		self.buttonIni = Button(self.master, bg=BG_framMain, fg=TITLE4_COLOR, font=BUTTON2_FONT)
 		self.buttonIni["text"]="elComandante.ini"
 		self.buttonIni.grid(row=mainRow, column=0, sticky=EW, columnspan=4)
-		self.buttonConf = Button(self.master, bg=ENTRY_LOCKED_COLOR, fg=TITLE4_COLOR, font=BUTTON2_FONT)
+		self.buttonConf = Button(self.master, bg=ENTRY_LOCKED_COLOR, fg=TITLE_COLOR, font=BUTTON2_FONT)
 		self.buttonConf["text"]="elComandante.conf"
 		self.buttonConf.grid(row=mainRow, column=4, sticky=EW, columnspan=5)
 
@@ -699,7 +783,7 @@ class interface():
 		eliniRow+=1
 		self.addXpad( self.ElIni, row=eliniRow)
 
-		### Operation = ['Hostname', 'TestCenter', 'Jui-Fa Tsai']
+		### Operation = ['Hostname', 'TestCenter', 'Operator']
 		eliniRow+=1
 		self.Operation = Frame( self.ElIni, bg=BG_framMain)
 		self.Operation.grid( row=eliniRow, column=1, sticky=N+S+E+W, columnspan=6 )
@@ -747,6 +831,6 @@ class interface():
 if __name__ == '__main__':
 	root = Tk()
 	app = interface(master=root)
-	app.loadConfig("./elComandante.ini.default")
+	#app.loadConfig("./elComandante.ini.default")
 	app.createWidgets()
 	root.mainloop()
