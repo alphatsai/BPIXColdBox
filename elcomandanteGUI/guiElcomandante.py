@@ -21,22 +21,17 @@ TITLE_COLOR='gray37'
 TITLE2_COLOR='gray27'
 TITLE3_COLOR='gray27'
 TITLE4_COLOR='gray17'
-#BG_framMain='LightCyan3'
 BG_framMain='gray93'
 TRUE_COLOR='OliveDrab1'
 FALSE_COLOR='PeachPuff3'
-#ERROR_COLOR='DeepPink2'
 ERROR_COLOR='IndianRed2'
-#PREVIEW_COLOR='CadetBlue2'
 PREVIEW_COLOR='medium sea green'
 UNLOCK_COLOR='DarkOrange1'
 LOCK_COLOR='goldenrod1'
 RELOAD_COLOR='IndianRed2'
 SAVE_COLOR='goldenrod1'
 QUIT_COLOR='IndianRed2'
-#MENU_FULL_COLOR='SkyBlue1'
 MENU_FULL_COLOR='LightSteelBlue1'
-#MENU_ROC_COLOR='MediumPurple'
 MENU_ROC_COLOR='light slate blue'
 BYTYPING_COLOR='khaki1'
 ENTRY_COLOR='snow'
@@ -217,7 +212,7 @@ class interface():
 		return	
 
 	### Add button for bool options from configure file 
-	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=5):
+	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, columnspan=1, value='', sticky='wn', width=5):
 		term1=""
 		term2=""
 		if label!="" :
@@ -241,7 +236,7 @@ class interface():
 		elif value == "True":
 			newButton['text']="ON"
 			newButton['bg']=TRUE_COLOR
-		newButton.grid( row=row, column=column, sticky=sticky)
+		newButton.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
 		self.BoolButtons[name]=newButton
 	
 	def changeBool(self, name, selction, option):
@@ -429,7 +424,7 @@ class interface():
 		return
 
 	### Add Menu for muduel tyes from configure file 
-	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', sticky='wn', width=10):
+	def addMuduelTypeMenu(self, frame, label="", name0="", name1="", row=0, column=0, columnspan=1, value='', sticky='wn', width=10):
 		term1=""
 		term2=""
 		if label!="" :
@@ -454,7 +449,7 @@ class interface():
 		elif value=="Roc":
 			newMenu['bg'] = MENU_ROC_COLOR
 			var.set(value)
-		newMenu.grid( row=row, column=column, sticky=sticky)
+		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
 		newMenu['menu'].delete(0)
 		newMenu['menu'].add_command( label="Full", command=lambda:self.chooseType( newMenu, 'Full', name0, name1, var))
 		newMenu['menu'].add_command( label="Roc",  command=lambda:self.chooseType( newMenu, 'Roc', name0, name1, var,))
@@ -474,6 +469,15 @@ class interface():
 			var.set(label)
 			self.iniClass.changeOptValue(selction,option,label)
 		return
+	
+	def expendWindow(self, frame, maxRow, maxCol):
+		for x in range(maxCol):
+		  Grid.columnconfigure(frame, x, weight=1)
+
+		for y in range(maxRow):
+		  Grid.rowconfigure(frame, y, weight=1)
+		return
+		
 
 	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
@@ -524,63 +528,100 @@ class interface():
 		self.addXpad( self.master, row=mainRow)
 
 		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
-		# DTB = ['Modules', 'ModuleType', 'TestboardUse']
+		### DTB = ['Modules', 'ModuleType', 'TestboardUse']
 		#mainRow+=1
-		#self.addLabel( label='Main', name1='Setup', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=TITLE2_FONT, sticky='s', fg=TITLE2_COLOR )
+		#self.addLabel( label='Main', name1='DTB', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=TITLE2_FONT, sticky='s', fg=TITLE2_COLOR )
 	
 		mainRow+=1
-		self.options = Frame( self.master, bg=BG_framMain)
-		self.tb0 = Frame( self.master, bg=BG_framMain)
-		self.tb1 = Frame( self.master, bg=BG_framMain)
-		self.tb2 = Frame( self.master, bg=BG_framMain)
-		self.tb3 = Frame( self.master, bg=BG_framMain)
-		self.options.grid( row=mainRow, column=1, sticky=S)
-		self.tb0.grid( row=mainRow, column=2, sticky=N)
-		self.tb1.grid( row=mainRow, column=3, sticky=N)
-		self.tb2.grid( row=mainRow, column=4, sticky=N)
-		self.tb3.grid( row=mainRow, column=5, sticky=N)
+		#self.DTB = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
+		self.DTB = Frame( self.master, bg=BG_framMain)
+		self.DTB.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
-		self.addLabel( label='Main_DTB', name1='Modules', frame=self.options, row=1, font=SECTION_FONT)
-		self.addLabel( label='Main_DTB', name1='ModuleType', frame=self.options, row=2, font=SECTION_FONT)
-		self.addLabel( label='Main_DTB', name1='TestboardUse', frame=self.options, row=3, font=SECTION_FONT)
+		startCol=0
+		spanCol=1
+		mainRow+=1
+		irow=1
+		icol=startCol+1
+		self.addLabel( label='Main_DTB', name1='Modules', frame=self.DTB, font=SECTION_FONT, column=startCol, row=irow, sticky='ew' )
+		for opt in self.iniClass.list_Default['Modules']:
+			value=self.iniClass.Sections['Modules'][opt]
+			self.addLabel(label='Main_DTB', name0='Modules', name1=opt, frame=self.DTB, row=irow-1, column=icol, sticky='ew', columnspan=spanCol)
+			self.addOptEntry(label='Main_DTB', name0='Modules', name1=opt, frame=self.DTB, value=value, row=irow, column=icol, sticky='ew', columnspan=spanCol)
+			icol+=spanCol
+		irow+=1
 
-		self.addLabel( label='Main_DTB', name1='TB0', frame=self.tb0, font=SECTION_FONT)
-		self.addLabel( label='Main_DTB', name1='TB1', frame=self.tb1, font=SECTION_FONT)
-		self.addLabel( label='Main_DTB', name1='TB2', frame=self.tb2, font=SECTION_FONT)
-		self.addLabel( label='Main_DTB', name1='TB3', frame=self.tb3, font=SECTION_FONT)
+		icol=startCol+1
+		self.addLabel( label='Main_DTB', name1='ModuleType', frame=self.DTB, font=SECTION_FONT, column=startCol, row=irow, sticky='ew' )
+		for opt in self.iniClass.list_Default['ModuleType']:
+			value=self.iniClass.Sections['ModuleType'][opt]
+			self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1=opt, frame=self.DTB, value=value, row=irow, column=icol, sticky='ew', columnspan=spanCol)
+			icol+=spanCol
+		irow+=1
 
-		value0=self.iniClass.Sections['Modules']['TB0']
-		value1=self.iniClass.Sections['Modules']['TB1']
-		value2=self.iniClass.Sections['Modules']['TB2']
-		value3=self.iniClass.Sections['Modules']['TB3']
-		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB0', frame=self.tb0, value=value0, row=1)
-		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB1', frame=self.tb1, value=value1, row=1)
-		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB2', frame=self.tb2, value=value2, row=1)
-		self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB3', frame=self.tb3, value=value3, row=1)
+		icol=startCol+1
+		self.addLabel( label='Main_DTB', name1='TestboardUse', frame=self.DTB, font=SECTION_FONT, column=startCol, row=irow,sticky='ew' )
+		for opt in self.iniClass.list_Default['TestboardUse']:
+			value=self.iniClass.Sections['TestboardUse'][opt]
+			self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1=opt, frame=self.DTB, value=value, row=irow, column=icol, sticky='ew', columnspan=spanCol)
+			icol+=spanCol
+		irow+=1
+		self.expendWindow(self.DTB, irow, icol)
+		#self.options = Frame( self.master, bg=BG_framMain)
+		#self.tb0 = Frame( self.master, bg=BG_framMain)
+		#self.tb1 = Frame( self.master, bg=BG_framMain)
+		#self.tb2 = Frame( self.master, bg=BG_framMain)
+		#self.tb3 = Frame( self.master, bg=BG_framMain)
+		#self.expendWindow(self.tb0, 4, 1)
+		#self.expendWindow(self.tb1, 4, 1)
+		#self.expendWindow(self.tb2, 4, 1)
+		#self.expendWindow(self.tb3, 4, 1)
+		#self.options.grid( row=mainRow, column=1, sticky=N+S+E+W)
+		#self.tb0.grid( row=mainRow, column=2, sticky=N+S+E+W)
+		#self.tb1.grid( row=mainRow, column=3, sticky=N+S+E+W)
+		#self.tb2.grid( row=mainRow, column=4, sticky=N+S+E+W)
+		#self.tb3.grid( row=mainRow, column=5, sticky=N+S+E+W)
 
-		value0=self.iniClass.Sections['ModuleType']['TB0']
-		value1=self.iniClass.Sections['ModuleType']['TB1']
-		value2=self.iniClass.Sections['ModuleType']['TB2']
-		value3=self.iniClass.Sections['ModuleType']['TB3']
-		self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB0', frame=self.tb0, value=value0, row=2)
-		self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB1', frame=self.tb1, value=value1, row=2)
-		self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB2', frame=self.tb2, value=value2, row=2)
-		self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB3', frame=self.tb3, value=value3, row=2)
+		#self.addLabel( label='Main_DTB', name1='Modules', frame=self.options, row=1, font=SECTION_FONT, sticky='s')
+		#self.addLabel( label='Main_DTB', name1='ModuleType', frame=self.options, row=2, font=SECTION_FONT, sticky='s')
+		#self.addLabel( label='Main_DTB', name1='TestboardUse', frame=self.options, row=3, font=SECTION_FONT, sticky='s')
 
-		value0=self.iniClass.Sections['TestboardUse']['TB0']
-		value1=self.iniClass.Sections['TestboardUse']['TB1']
-		value2=self.iniClass.Sections['TestboardUse']['TB2']
-		value3=self.iniClass.Sections['TestboardUse']['TB3']
-		self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB0', frame=self.tb0, value=value0, row=3, sticky='we')
-		self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB1', frame=self.tb1, value=value1, row=3, sticky='we')
-		self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB2', frame=self.tb2, value=value2, row=3, sticky='we')
-		self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB3', frame=self.tb3, value=value3, row=3, sticky='we')
+		#self.addLabel( label='Main_DTB', name1='TB0', frame=self.tb0, font=SECTION_FONT)
+		#self.addLabel( label='Main_DTB', name1='TB1', frame=self.tb1, font=SECTION_FONT)
+		#self.addLabel( label='Main_DTB', name1='TB2', frame=self.tb2, font=SECTION_FONT)
+		#self.addLabel( label='Main_DTB', name1='TB3', frame=self.tb3, font=SECTION_FONT)
+
+		#value0=self.iniClass.Sections['Modules']['TB0']
+		#value1=self.iniClass.Sections['Modules']['TB1']
+		#value2=self.iniClass.Sections['Modules']['TB2']
+		#value3=self.iniClass.Sections['Modules']['TB3']
+		#self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB0', frame=self.tb0, value=value0, row=1)
+		#self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB1', frame=self.tb1, value=value1, row=1)
+		#self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB2', frame=self.tb2, value=value2, row=1)
+		#self.addOptEntry(label='Main_DTB', name0='Modules', name1='TB3', frame=self.tb3, value=value3, row=1)
+
+		#value0=self.iniClass.Sections['ModuleType']['TB0']
+		#value1=self.iniClass.Sections['ModuleType']['TB1']
+		#value2=self.iniClass.Sections['ModuleType']['TB2']
+		#value3=self.iniClass.Sections['ModuleType']['TB3']
+		#self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB0', frame=self.tb0, value=value0, row=2)
+		#self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB1', frame=self.tb1, value=value1, row=2)
+		#self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB2', frame=self.tb2, value=value2, row=2)
+		#self.addMuduelTypeMenu( label='Main_DTB', name0='ModuleType', name1='TB3', frame=self.tb3, value=value3, row=2)
+
+		#value0=self.iniClass.Sections['TestboardUse']['TB0']
+		#value1=self.iniClass.Sections['TestboardUse']['TB1']
+		#value2=self.iniClass.Sections['TestboardUse']['TB2']
+		#value3=self.iniClass.Sections['TestboardUse']['TB3']
+		#self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB0', frame=self.tb0, value=value0, row=3, sticky='we')
+		#self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB1', frame=self.tb1, value=value1, row=3, sticky='we')
+		#self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB2', frame=self.tb2, value=value2, row=3, sticky='we')
+		#self.addBoolButton( label='Main_DTB', name0='TestboardUse', name1='TB3', frame=self.tb3, value=value3, row=3, sticky='we')
 
 		# Pad 
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
 
-		# Hardware Setting = ['CoolingBox', 'Keithley', 'LowVoltage', 'Xray']
+		### Hardware Setting = ['CoolingBox', 'Keithley', 'LowVoltage', 'Xray']
 		#mainRow+=1
 		#self.addLabel(label='Main', name1='Setup', frame=self.master, row=mainRow, columnspan=COLUMNMAX, font=TITLE2_FONT,sticky='s', fg=TITLE2_COLOR)
 
@@ -598,6 +639,7 @@ class interface():
 			else:
 				self.addOptEntry(label='Main_Setup', name0='CoolingBox', name1=opt, frame=self.CoolingBox, value=value, row=irow)
 			irow+=1
+		self.expendWindow(self.CoolingBox, irow, 1)
 
 		self.Keithley = Frame( self.master, bg=BG_framMain)
 		self.Keithley.grid( row=mainRow, column=3, sticky=N)
@@ -612,6 +654,7 @@ class interface():
 			else:
 				self.addOptEntry(label='Main_Setup', name0='Keithley', name1=opt, frame=self.Keithley, value=value, row=irow)
 			irow+=1
+		self.expendWindow(self.Keithley, irow, 1)
 
 		self.LowVoltage = Frame( self.master, bg=BG_framMain)
 		self.LowVoltage.grid( row=mainRow, column=4, sticky=N)
@@ -626,6 +669,7 @@ class interface():
 			else:
 				self.addOptEntry(label='Main_Setup', name0='LowVoltage', name1=opt, frame=self.LowVoltage, value=value, row=irow)
 			irow+=1
+		self.expendWindow(self.LowVoltage, irow, 1)
 
 		self.Xray = Frame( self.master, bg=BG_framMain)
 		self.Xray.grid( row=mainRow, column=5, sticky=N)
@@ -640,6 +684,7 @@ class interface():
 			else:
 				self.addOptEntry(label='Main_Setup', name0='Xray', name1=opt, frame=self.Xray, value=value, row=irow)
 			irow+=1
+		self.expendWindow(self.Xray, irow, 1)
 
 		# Pad 
 		mainRow+=1
@@ -651,7 +696,7 @@ class interface():
 
 		mainRow+=1
 		self.Process = Frame( self.master, bg=BG_framMain, relief=SUNKEN, borderwidth=2)
-		self.Process.grid( row=mainRow, column=1, sticky=W+N, columnspan=6 )
+		self.Process.grid( row=mainRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		mainRow+=1
 		irow=1
@@ -706,6 +751,7 @@ class interface():
 				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1)
 			irow+=1
 	
+		self.expendWindow(self.Process, irow, 7)
 		# Pad 
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
@@ -719,8 +765,12 @@ class interface():
 		# Pad 
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
-		return
 
+		# For objects can expend with window
+		mainRow+=1
+		self.expendWindow(self.master, mainRow, COLUMNMAX)
+
+		return
 ####### example ########
 if __name__ == '__main__':
 	root = Tk()
