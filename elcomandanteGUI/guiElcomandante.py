@@ -63,17 +63,18 @@ class interface():
 		self.testPath='./example/tests'
 		self.loadElcommandateIni();
 		self.loadElcommandateConf();
-		self.loadTestsOptions()
 	
 	#### Load configure file
 	def loadElcommandateIni(self):
 		self.iniClass = elComandante_ini()
 		self.iniClass.getDefault(self.elcommandate_ini)
+		self.loadTestsOptions()
 		return
 
 	def loadElcommandateConf(self):
 		self.confClass = elComandante_conf()
 		self.confClass.getDefault(self.elcommandate_conf)
+		self.loadTestsOptions()
 		return
 
 	def loadTestsOptions(self):
@@ -108,6 +109,10 @@ class interface():
 					option = name.split('_')[3]
 					entry.delete(0, END)
 					entry.insert(0, self.iniClass.Sections[section][option])
+				# refresh add new test entry
+				self.lastClickNewTest='Ex: IV@10'
+				self.Entries['Main_Process_Tests_NewTest'].delete(0,END)
+				self.Entries['Main_Process_Tests_NewTest'].insert(0, 'Ex: IV@10')
 				# refresh BoolButtons 
 				for name in self.BoolButtons:
 					button = self.BoolButtons[name]
@@ -129,10 +134,8 @@ class interface():
 			else:
 				print ">> [ERROR] Can't find '%s'"% self.entryConfig.get()
 				return
-
 		self.lock()
 		self.isfixed=True
-
 
 	### Lock button
 	def lock(self):
@@ -194,7 +197,7 @@ class interface():
 	### Add commend label 
 	def addLabel(self, frame, label="", name0="", name1="", row=0, column=0, sticky='nsew', columnspan=1, rowspan=1, bg=BG_framMain, font=OPTION_FONT, fg=TITLE3_COLOR):
 		newLabel = Label(frame, bg=bg, font=font, fg=fg)
-		newLabel["text"] = name1 
+		newLabel["text"] = name1
 		newLabel.grid( row=row, column=column, sticky=sticky, columnspan=columnspan, rowspan=rowspan )
 		term1=""
 		term2=""
@@ -346,7 +349,7 @@ class interface():
 		newButton['font']=BUTTON_FONT
 		newButton.grid( row=row, column=column, sticky=sticky, rowspan=rowspan, columnspan=columnspan)
 		if self.checkTests(newButton, name1):
-			newButton['command']=lambda:self.addTest(newButton)
+			newButton['command']=lambda:self.activeTestButton(newButton)
 			newButton.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
 			newButton.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
 		self.testButtons[name]=newButton
@@ -365,7 +368,7 @@ class interface():
 		else:
 			return True
 
-	def addTest(self, button):
+	def activeTestButton(self, button):
 		if self.isfixed:
 			print '>> [INFO] The button is locked!'
 			return
@@ -400,9 +403,53 @@ class interface():
 			print ">>        Changed Tests %s: "%(restTests)
 			return
 
-		#if button['text'] == 'Add new test':
+		newprocess=''
+		if button['text'] == 'Add new test':
+			self.lastClickNewTest = self.Entries['Main_Process_Tests_NewTest'].get()
+			if self.lastClickNewTest == '':
+				return
+			i=1
+			newalltests = self.lastClickNewTest.split(',')
+			for newTests in newalltests:
+				newtests = newTests.strip().split('@') #remove backspace in front/end first
+				newtest  = newtests[0]
+				if len(newtests) > 2:
+					self.Entries['Main_Process_Tests_NewTest']['bg']=ERROR_COLOR
+					print '>> [ERROR] Too many arguments'
+					print '>>         E.x: Fulltest@17,IV@10'
+					self.lastClickNewTest=''
+					return
+				elif len(newtests) == 2:
+					temperature = newtests[1]
+					if not temperature.isdigit():
+						self.Entries['Main_Process_Tests_NewTest']['bg']=ERROR_COLOR
+						print '>> [ERROR] After @ shall be digit, i.e temperature'
+						print '>>         E.x: Fulltest@17'
+						self.lastClickNewTest=''
+						return
 
-		newprocess = button['text']
+				if newtest in self.tests or newtest == 'IV' or newtest == 'Cycle':
+					if newtest == 'Cycle' and len(newtests)!=1:
+						self.Entries['Main_Process_Tests_NewTest']['bg']=ERROR_COLOR
+						print ">> [ERROR] Cycle shall not add @ and temperature"
+						self.lastClickNewTest=''
+						return
+					
+					if len(newalltests) > 1 and i<len(newalltests):
+						newprocess += newTests.strip()+','
+					else:
+						newprocess += newTests.strip()
+					i+=1
+					self.Entries['Main_Process_Tests_NewTest']['bg']=ENTRY_COLOR
+				else:
+					self.Entries['Main_Process_Tests_NewTest']['bg']=ERROR_COLOR
+					print ">> [ERROR] Not found '"+newtest+"' in "+self.testPath
+					print ">>         Please add it in '"+self.testPath+"' and reload"
+					self.lastClickNewTest=''
+					return
+		else: 
+			newprocess = button['text']
+
 		if tests ==  '':
 			tests=newprocess
 		else:
@@ -414,7 +461,7 @@ class interface():
 		print ">> [INFO] Add new process %s "%(newprocess)
 		print ">>        Changed Tests : %s "%(tests)
 		return
-
+	
 	def changeColorTestEntry(self, action):
 		if self.isfixed:
 			return
@@ -790,7 +837,14 @@ class interface():
 				self.addTestButton(label='Main_Process', name0='Tests', name1='IV@-20', frame=self.Process, row=irow, sticky='ew', column=1 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Pretest@-20', frame=self.Process, row=irow, sticky='ew', column=2 )
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, sticky='ew', column=3 )
-				self.addEntry(label='Main_Process', name0='Tests', name1='New Test', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
+				# spacial iterm 
+				self.addEntry(label='Main_Process', name0='Tests', name1='NewTest', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
+				self.lastClickNewTest='Ex: IV@10'
+				self.Entries['Main_Process_Tests_NewTest'].bind('<Key>', lambda event:self.chEntryBG(self.Entries['Main_Process_Tests_NewTest'], self.lastClickNewTest))
+				self.Entries['Main_Process_Tests_NewTest'].bind('<Leave>', lambda event:self.checkChanging(self.Entries['Main_Process_Tests_NewTest'],self.lastClickNewTest ))
+				self.Entries['Main_Process_Tests_NewTest'].bind('<FocusOut>', lambda event:self.checkChanging(self.Entries['Main_Process_Tests_NewTest'],self.lastClickNewTest ))
+				self.Entries['Main_Process_Tests_NewTest'].bind('<Return>', lambda event:self.activeTestButton(self.testButtons["Main_Process_Tests_Add new test"]))
+
 			elif opt == 'TestDescription':
 				self.addOptEntry(label='Main_Process', name0='Tests', name1=opt, frame=self.Process, value=value, row=irow, column=1, columnspan=4)
 				self.addTestButton(label='Main_Process', name0='Tests', name1='Delete', frame=self.Process, row=irow, column=5 )
