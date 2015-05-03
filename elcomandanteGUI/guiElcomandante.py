@@ -415,12 +415,13 @@ class interface():
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
-		self.setDelayVar(newMenu, var, name0, name1, value)
-		newMenu.grid( row=row, column=column, sticky=sticky)
+		newMenu['menu'].delete(0)
 		sec=1.
 		while ( sec <= nmax ):
 			newMenu['menu'].add_command(label=str(int(sec))+' Sec.',command=lambda sec=sec:self.chooseDelay( newMenu, sec, name0, name1, var))
 			sec+=1
+		newMenu.grid( row=row, column=column, sticky=sticky)
+		self.setDelayVar(newMenu, var, name0, name1, value)
 		self.Menu[name]=newMenu
 		self.Var[name]=var
 	
@@ -435,7 +436,6 @@ class interface():
 		else:
 			menu['bg'] = MENU_FULL_COLOR
 			var.set(str(int(float(value)*2))+' Sec.')
-		menu['menu'].delete(0)
 
 	def chooseDelay(self, menu, sec, selction, option, var):
 		if self.isfixed:
@@ -463,12 +463,13 @@ class interface():
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
-		self.setCycleVar(newMenu, var, name0, name1, value)
-		newMenu.grid( row=row, column=column, sticky=sticky)
+		newMenu['menu'].delete(0)
 		ilabel=1
 		while ( ilabel <= nmax ):
 			newMenu['menu'].add_command(label=str(ilabel),command=lambda ilabel=ilabel:self.chooseCycle(newMenu,str(ilabel),name0,name1,var))
 			ilabel+=1
+		newMenu.grid( row=row, column=column, sticky=sticky)
+		self.setCycleVar(newMenu, var, name0, name1, value)
 		self.Menu[name]=newMenu
 		self.Var[name]=var
 
@@ -483,7 +484,6 @@ class interface():
 		else:
 			menu['bg'] = MENU_FULL_COLOR
 			var.set(str(int(value)))
-		menu['menu'].delete(0)
 		return
 
 	def chooseCycle(self, menu, label, selction, option, var):
@@ -511,10 +511,11 @@ class interface():
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
 		newMenu['width'] = width
-		self.setTypeVar( newMenu, var, name0, name1, value)
-		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+		newMenu['menu'].delete(0)
 		newMenu['menu'].add_command( label="Full", command=lambda:self.chooseType( newMenu, 'Full', name0, name1, var))
 		newMenu['menu'].add_command( label="Roc",  command=lambda:self.chooseType( newMenu, 'Roc', name0, name1, var,))
+		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+		self.setTypeVar( newMenu, var, name0, name1, value)
 		self.Menu[name]=newMenu
 		self.Var[name]=var
 	
@@ -532,7 +533,6 @@ class interface():
 		elif value=="Roc":
 			menu['bg'] = MENU_ROC_COLOR
 			var.set(value)
-		menu['menu'].delete(0)
 		return
 
 	def chooseType(self, menu, label, selction, option, var):
