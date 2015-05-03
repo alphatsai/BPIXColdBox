@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, re, sys, shutil
+import os, re, sys, shutil, commands
 import math, ROOT
 
 from Tkinter import *
@@ -60,8 +60,10 @@ class interface():
 		self.Var={}
 		self.elcommandate_ini='./elComandante.ini.default'
 		self.elcommandate_conf='./elComandante.conf.default'
+		self.testPath='./example/tests'
 		self.loadElcommandateIni();
 		self.loadElcommandateConf();
+		self.loadTestsOptions()
 	
 	#### Load configure file
 	def loadElcommandateIni(self):
@@ -74,6 +76,11 @@ class interface():
 		self.confClass.getDefault(self.elcommandate_conf)
 		return
 
+	def loadTestsOptions(self):
+		listDir = commands.getoutput('ls '+self.testPath)
+		self.tests = listDir.split('\n')
+		return
+
 	### Add empty pad for designing 
 	def addXpad(self, frame, colmax=8, bg=BG_framMain, width=10, height=1, row=0):
 		col=0
@@ -84,7 +91,6 @@ class interface():
 		return
 
 	### Change elcommandate.ini and elcommandate.conf
-
 
 	### ReLoad button
 	def reLoadConfig(self):
@@ -332,17 +338,32 @@ class interface():
 			term2=name0+"_"
 		name=term1+term2+name1
 
-		newButton = Button(frame, command=lambda:self.addTest(newButton))
+		newButton = Button(frame)
 		newButton['width'] =width
 		newButton['text']=name1
 		newButton['bg']=FALSE_COLOR
 		newButton['fg']=TITLE4_COLOR
 		newButton['font']=BUTTON_FONT
 		newButton.grid( row=row, column=column, sticky=sticky, rowspan=rowspan, columnspan=columnspan)
-		newButton.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
-		newButton.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
+		if self.checkTests(newButton, name1):
+			newButton['command']=lambda:self.addTest(newButton)
+			newButton.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
+			newButton.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
 		self.testButtons[name]=newButton
 		return
+
+	def checkTests(self, button, tests):
+		test = tests.split('@')[0]
+		testfile =  self.testPath+'/'+test
+		if test=='IV' or test== 'Cycle' or test=='Add new test' or test=='Delete' or test=='Clear':
+			return True
+		elif not os.path.isfile(testfile):
+			print ">> [ERROR] Can't find '"+test+"' in '"+self.testPath+"', or it's not a file..."
+			button['text']=test+'??'
+			button['bg']=ERROR_COLOR
+			return False
+		else:
+			return True
 
 	def addTest(self, button):
 		if self.isfixed:
@@ -378,6 +399,8 @@ class interface():
 			print ">> [INFO] Delete a test '%s'"%(delTest)
 			print ">>        Changed Tests %s: "%(restTests)
 			return
+
+		#if button['text'] == 'Add new test':
 
 		newprocess = button['text']
 		if tests ==  '':
