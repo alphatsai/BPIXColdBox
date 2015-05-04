@@ -47,10 +47,13 @@ class interface():
 		self.isfixed=True
 		self.isIni=True
 		self.isConf=False
+		self.whichConfig={'elComandante.ini':self.isIni, 'elComandante.conf':self.isConf}
 		self.isfixed=True
 		self.iniClass = None
 		self.confClass = None
 		self.output=None
+		self.frames={}
+		self.framesButton={}
 		self.Labels={}
 		self.Entries={}
 		self.OptEntries={}
@@ -58,9 +61,11 @@ class interface():
 		self.testButtons={}
 		self.Menu={}
 		self.Var={}
+		self.testPath='./example/tests'
 		self.elcommandate_ini='./elComandante.ini.default'
 		self.elcommandate_conf='./elComandante.conf.default'
-		self.testPath='./example/tests'
+		self.confingurePath={'elComandante.ini':self.elcommandate_ini, 'elComandante.conf':self.elcommandate_conf}
+		self.whichConfig   ={'elComandante.ini':self.isIni,            'elComandante.conf':self.isConf}
 		self.loadElcommandateIni();
 		self.loadElcommandateConf();
 	
@@ -90,8 +95,35 @@ class interface():
 			pad.grid(row=row, column=col)
 			col+=1
 		return
+	
+	### Make all frame and tk can be expended with window
+	def expendWindow(self, frame, maxRow, maxCol):
+		for x in range(maxCol):
+		  Grid.columnconfigure(frame, x, weight=1)
 
+		for y in range(maxRow):
+		  Grid.rowconfigure(frame, y, weight=1)
+		return
+		
 	### Change elcommandate.ini and elcommandate.conf
+	def changeFrame(self, name):
+		frame = self.frames[name]
+		frame.tkraise()
+		for button in self.framesButton:
+			if button == name:
+				self.framesButton[button]['bg']=BG_framMain
+				self.framesButton[button]['fg']=TITLE4_COLOR
+				self.whichConfig[button]=True
+				self.Labels[button].tkraise()
+				self.entryConfig.delete(0, END)
+				self.entryConfig.insert(0, self.confingurePath[button])
+			else:
+				self.framesButton[button]['bg']=ENTRY_LOCKED_COLOR
+				self.framesButton[button]['fg']=TITLE_COLOR
+				self.whichConfig[button]=False
+		if not self.isfixed:
+			self.lock()
+		return
 
 	### ReLoad button
 	def reLoadConfig(self):
@@ -619,24 +651,9 @@ class interface():
 			var.set(label)
 			self.iniClass.changeOptValue(selction,option,label)
 		return
-	
-	def expendWindow(self, frame, maxRow, maxCol):
-		for x in range(maxCol):
-		  Grid.columnconfigure(frame, x, weight=1)
-
-		for y in range(maxRow):
-		  Grid.rowconfigure(frame, y, weight=1)
-		return
-		
 
 	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
-		# Title
-		#mainRow=0
-		#self.title = Label(self.master, bg=BG_framMain, font=('helvetica', 15, 'bold'), fg=TITLE_COLOR )
-		#self.title["text"]="elComandante.ini"
-		#self.title.grid(row=mainRow, column=0, columnspan=COLUMNMAX, sticky=NSEW )
-
 		# Pad 
 		#mainRow+=1
 		mainRow=0
@@ -644,10 +661,8 @@ class interface():
 
 		### * Configuration * -------------------------------------------------------------------------------------------------------
 		mainRow+=1
-		if self.isIni:
-			self.addLabel(label='Main', name1='elComandante.ini Input', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
-		elif self.isConf:
-			self.addLabel(label='Main', name1='elComandante.conf Input', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
+		self.addLabel(label='', name1='elComandante.conf', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
+		self.addLabel(label='', name1='elComandante.ini', frame=self.master, row=mainRow, column=1, font=SECTION_FONT, sticky='ew')
 
 		self.entryConfig = Entry(self.master)
 		if self.isfixed:
@@ -681,18 +696,30 @@ class interface():
 		mainRow+=1
 		self.addXpad( self.master, row=mainRow)
 
+		# Button for changing elComandante_ini or elComandante_config 
 		mainRow+=1
-		self.buttonIni = Button(self.master, bg=BG_framMain, fg=TITLE4_COLOR, font=BUTTON2_FONT)
+		self.buttonIni = Button(self.master, bg=BG_framMain, fg=TITLE4_COLOR, font=BUTTON2_FONT, command=lambda: self.changeFrame('elComandante.ini'))
 		self.buttonIni["text"]="elComandante.ini"
 		self.buttonIni.grid(row=mainRow, column=0, sticky=EW, columnspan=4)
-		self.buttonConf = Button(self.master, bg=ENTRY_LOCKED_COLOR, fg=TITLE_COLOR, font=BUTTON2_FONT)
+		self.framesButton['elComandante.ini']=self.buttonIni
+		self.buttonConf = Button(self.master, bg=ENTRY_LOCKED_COLOR, fg=TITLE_COLOR, font=BUTTON2_FONT, command=lambda: self.changeFrame('elComandante.conf'))
 		self.buttonConf["text"]="elComandante.conf"
 		self.buttonConf.grid(row=mainRow, column=4, sticky=EW, columnspan=5)
+		self.framesButton['elComandante.conf']=self.buttonConf
 
-		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
+		# * Set frame for elComandante.ini and elComandante.conf
 		mainRow+=1
 		self.ElIni = Frame( self.master, bg=BG_framMain, relief=RAISED, borderwidth=2 )
 		self.ElIni.grid( row=mainRow, column=0, sticky=N+S+E+W, columnspan=COLUMNMAX )
+		self.ElConf = Frame( self.master, bg=BG_framMain, relief=RAISED, borderwidth=2 )
+		self.ElConf.grid( row=mainRow, column=0, sticky=N+S+E+W, columnspan=COLUMNMAX )
+		self.frames["elComandante.ini"]=self.ElIni
+		self.frames["elComandante.conf"]=self.ElConf
+
+		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
+
+		self.buttonIni.tkraise()
+		self.ElIni.tkraise()  # Show elComandante.ini first
 
 		### DTB = ['Modules', 'ModuleType', 'TestboardUse']
 		# Pad 
