@@ -11,6 +11,8 @@ from readConfg import elComandante_conf
 
 Delay_MAX=8 #sec
 COLUMNMAX=9
+ISINI=1
+ISCONF=2
 TITLE2_FONT=('helvetica', 15, 'bold')
 SECTION_FONT=('helvetica', 10, 'bold')
 OPTION_FONT=('helvetica', 10 )
@@ -275,19 +277,31 @@ class interface():
 		return name
 
 	### Add entry for options from configure file 
-	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, isFixed=False ):
+	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, isFixed=False, classType=ISINI ):
 		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan)
 		newEntry = self.Entries[name]
-		if isFixed:
-			newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
-			newEntry.bind('<Leave>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
-			newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
-			newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
-		else:
-			newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry,self.iniClass.Sections[name0][name1] ))
-			newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
-			newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
-			newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+		if classType == ISINI:
+			if isFixed:
+				newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
+				newEntry.bind('<Leave>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
+				newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
+				newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
+			else:
+				newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry,self.iniClass.Sections[name0][name1] ))
+				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+				newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
+				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+		if classType == ISCONF:
+			if isFixed:
+				newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1], True))
+				newEntry.bind('<Leave>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1]))
+				newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1], True))
+				newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1]))
+			else:
+				newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry,self.confClass.Sections[name0][name1] ))
+				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1] ))
+				newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1, ISCONF ))
+				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1] ))
 		self.Entries[name]=newEntry
 		self.OptEntries[name]=newEntry
 		return
@@ -307,15 +321,23 @@ class interface():
 			entry['bg']=ENTRY_COLOR
 		return
 
-	def ConfirmChangeOpt(self, entry, section, option, murmur=True):
-		value = self.iniClass.Sections[section][option]
+	def ConfirmChangeOpt(self, entry, section, option, classType=ISINI, murmur=True):
+		if classType == ISINI:
+			value = self.iniClass.Sections[section][option]
+		if classType == ISCONF:
+			value = self.confClass.Sections[section][option]
+
 		if self.isfixed:
 			self.unTouchEntry(entry, value, murmur)
 			return
+
 		newvalue = entry.get().strip()
 		if value != newvalue and newvalue !='':
 			print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, value, newvalue)
-			self.iniClass.changeOptValue(section,option, newvalue)
+			if classType == ISINI:
+				self.iniClass.changeOptValue(section,option, newvalue)
+			if classType == ISCONF:
+				self.confClass.changeOptValue(section,option, newvalue)
 			entry['bg']=ENTRY_COLOR
 		return
 
@@ -358,7 +380,7 @@ class interface():
 			button['bg']=TRUE_COLOR
 		return
 
-	def changeBool(self, name, selction, option):
+	def changeBool(self, name, selction, option, classType=ISINI):
 		if self.isfixed:
 			print '>> [INFO] The button is locked!'
 			return
@@ -367,12 +389,18 @@ class interface():
 			print ">> [INFO] Change %s : %s : False -> True "%(selction, option)
 			self.BoolButtons[name]['text']="ON"
 			self.BoolButtons[name]['bg']=TRUE_COLOR
-			self.iniClass.changeOptValue(selction,option,"True")
+			if classType == ISINI:
+				self.iniClass.changeOptValue(selction,option,"True")
+			if classType == ISCONF:
+				self.confClass.changeOptValue(selction,option,"True")
 		else:
 			print ">> [INFO] Change %s : %s : %s -> False "%(selction, option, self.BoolButtons[name]['text'] )
 			self.BoolButtons[name]['text']="OFF"
 			self.BoolButtons[name]['bg']=FALSE_COLOR
-			self.iniClass.changeOptValue(selction,option,"False")
+			if classType == ISINI:
+				self.iniClass.changeOptValue(selction,option,"False")
+			if classType == ISCONF:
+				self.confClass.changeOptValue(selction,option,"False")
 		return
 
 	### Add button for Tests options from configure file 
@@ -714,7 +742,7 @@ class interface():
 			self.iniClass.changeOptValue(selction,option,label)
 		return
 
-	######## * ini function and platform ####### ======================================================================================
+	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
 		# Pad 
 		#mainRow+=1
@@ -779,7 +807,6 @@ class interface():
 		self.frames["elComandante.conf"]=self.ElConf
 
 		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
-
 		self.buttonIni.tkraise()
 		self.ElIni.tkraise()  # Show elComandante.ini first
 
@@ -972,7 +999,7 @@ class interface():
 		for opt in self.iniClass.list_Default['OperationDetails']:
 			value=self.iniClass.Sections['OperationDetails'][opt]
 			self.addLabel(label='ini_Operation', name0='OperationDetails', name1=opt, frame=self.Operation, row=irow-1, column=icol, sticky='ew')
-			self.addOptEntry(label='ini_Operation', name0='OperationDetails', name1=opt, frame=self.Operation, value=value, row=irow, column=icol, sticky='ew')
+			self.addOptEntry(label='ini_Operation', name0='OperationDetails', name1=opt, frame=self.Operation, value=value, row=irow, column=icol, sticky='ew', width=15)
 			icol+=1
 		irow+=1
 		self.expendWindow(self.Operation, irow, icol)
@@ -984,6 +1011,30 @@ class interface():
 		eliniRow+=1
 		self.expendWindow(self.ElIni, eliniRow, COLUMNMAX)
 		### * [END] elComandante_ini * -------------------------------------------------------------------------------------------------------
+
+		### * elComandante_conf * -------------------------------------------------------------------------------------------------------
+		### DTBAddress = ['TB0', 'TB1', 'TB2', 'TB3']
+		# Pad 
+		elconfRow=0
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER)
+		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		startCol=0
+		irow=1
+		icol=startCol+1
+		self.addLabel( label='conf_DTB', name1='TestboardAddress', frame=self.DTBAddress, font=SECTION_FONT, column=startCol, row=irow, sticky='ew' )
+		for opt in self.confClass.list_Default['TestboardAddress']:
+			value=self.confClass.Sections['TestboardAddress'][opt]
+			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=2)
+			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=2, classType=ISCONF)
+			icol+=2
+		irow+=1
+		self.expendWindow(self.DTBAddress, irow, icol)
+
+		### * [END] elComandante_conf * -------------------------------------------------------------------------------------------------------
 
 		# Pad 
 		mainRow+=1
