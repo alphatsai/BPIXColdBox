@@ -638,9 +638,18 @@ class interface():
 			if not newvalue.isdigit(): 
 				print '>> [ERROR] Shall be a digit number, i.e times'
 				return
+
+			self.lastClickNewCycle=newvalue
+
+			if int(newvalue) <= 10:
+				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
+				self.Entries['ini_Process_Cycle_Other'].delete(0, END)
+				self.Entries['ini_Process_Cycle_Other'].insert(0, '')
+				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
+				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
+				
 			print ">> [INFO] Change Cycle : nCycles : %s -> %s "%( value, newvalue)
 			self.iniClass.changeOptValue('Cycle', 'nCycles', newvalue)
-			self.lastClickNewCycle=newvalue
 			entry['bg']=ENTRY_COLOR
 		return
 
