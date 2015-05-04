@@ -644,13 +644,22 @@ class interface():
 			if int(newvalue) <= 10:
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
 				self.Entries['ini_Process_Cycle_Other'].delete(0, END)
-				self.Entries['ini_Process_Cycle_Other'].insert(0, '')
+				self.Entries['ini_Process_Cycle_Other']['bg']=ENTRY_COLOR
 				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
 				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
 				
 			print ">> [INFO] Change Cycle : nCycles : %s -> %s "%( value, newvalue)
 			self.iniClass.changeOptValue('Cycle', 'nCycles', newvalue)
 			entry['bg']=ENTRY_COLOR
+		return
+
+	def checkEmpty(self, entry):
+		if entry.get() == '' or int(entry.get()) <= 10:
+				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
+				self.Entries['ini_Process_Cycle_Other'].delete(0, END)
+				self.Entries['ini_Process_Cycle_Other']['bg']=ENTRY_COLOR
+				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
+				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
 		return
 
 	### Add Menu for muduel tyes from configure file 
@@ -894,6 +903,7 @@ class interface():
 		self.Entries['ini_Process_Cycle_Other'].bind('<Key>', lambda event:self.chEntryBG(self.Entries['ini_Process_Cycle_Other'], self.lastClickNewCycle))
 		self.Entries['ini_Process_Cycle_Other'].bind('<Leave>', lambda event:self.checkChanging(self.Entries['ini_Process_Cycle_Other'],self.lastClickNewCycle ))
 		self.Entries['ini_Process_Cycle_Other'].bind('<FocusOut>', lambda event:self.checkChanging(self.Entries['ini_Process_Cycle_Other'],self.lastClickNewCycle ))
+		self.Entries['ini_Process_Cycle_Other'].bind('<FocusOut>', lambda event:self.checkEmpty(self.Entries['ini_Process_Cycle_Other']))
 		self.Entries['ini_Process_Cycle_Other'].bind('<Return>', lambda event:self.chooseOtherCycle(self.Entries['ini_Process_Cycle_Other']))
 		if self.lastClickNewCycle <= 10:
 			self.Labels['ini_Process_Cycle_HideOther'].tkraise()
