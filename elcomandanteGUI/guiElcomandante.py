@@ -120,8 +120,8 @@ class interface():
 				self.framesButton[button]['bg']=ENTRY_LOCKED_COLOR
 				self.framesButton[button]['fg']=TITLE_COLOR
 				self.whichConfig[button]=False
-		if not self.isfixed:
-			self.lock()
+		#if not self.isfixed:
+		#	self.lock()
 		return
 
 	### ReLoad button
