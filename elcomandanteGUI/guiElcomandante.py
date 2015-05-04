@@ -45,9 +45,6 @@ class interface():
 		self.master["bg"]=BG_framMain
 		self.master.grid()
 		self.isfixed=True
-		self.isIni=True
-		self.isConf=False
-		self.whichConfig={'elComandante.ini':self.isIni, 'elComandante.conf':self.isConf}
 		self.isfixed=True
 		self.iniClass = None
 		self.confClass = None
@@ -62,23 +59,25 @@ class interface():
 		self.Menu={}
 		self.Var={}
 		self.testPath='./example/tests'
-		self.elcommandate_ini='./elComandante.ini.default'
-		self.elcommandate_conf='./elComandante.conf.default'
-		self.confingurePath={'elComandante.ini':self.elcommandate_ini, 'elComandante.conf':self.elcommandate_conf}
-		self.whichConfig   ={'elComandante.ini':self.isIni,            'elComandante.conf':self.isConf}
+		self.confingurePath = { 'elComandante.ini' :'./elComandante.ini.default',
+					'elComandante.conf':'./elComandante.conf.default'
+					}
+		self.whichConfig = { 'elComandante.ini':True,
+				     'elComandante.conf':False
+				   }
 		self.loadElcommandateIni();
 		self.loadElcommandateConf();
 	
 	#### Load configure file
 	def loadElcommandateIni(self):
 		self.iniClass = elComandante_ini()
-		self.iniClass.getDefault(self.elcommandate_ini)
+		self.iniClass.getDefault(self.confingurePath['elComandante.ini'])
 		self.loadTestsOptions()
 		return
 
 	def loadElcommandateConf(self):
 		self.confClass = elComandante_conf()
-		self.confClass.getDefault(self.elcommandate_conf)
+		self.confClass.getDefault(self.confingurePath['elComandante.conf'])
 		self.loadTestsOptions()
 		return
 
@@ -99,10 +98,10 @@ class interface():
 	### Make all frame and tk can be expended with window
 	def expendWindow(self, frame, maxRow, maxCol):
 		for x in range(maxCol):
-		  Grid.columnconfigure(frame, x, weight=1)
+			Grid.columnconfigure(frame, x, weight=1)
 
 		for y in range(maxRow):
-		  Grid.rowconfigure(frame, y, weight=1)
+			Grid.rowconfigure(frame, y, weight=1)
 		return
 		
 	### Change elcommandate.ini and elcommandate.conf
@@ -130,9 +129,10 @@ class interface():
 		if self.isfixed:
 			print '>> [INFO] The button is locked!'
 			return
-		if self.isIni:
+		if self.whichConfig['elComandante.ini']:
+			print 'here'
 			if os.path.isfile( self.entryConfig.get() ):
-				self.elcommandate_ini = self.entryConfig.get()
+				self.confingurePath['elComandante.ini'] = self.entryConfig.get()
 				self.loadElcommandateIni()
 				# refresh option entries
 				for name in self.OptEntries:
@@ -166,6 +166,8 @@ class interface():
 			else:
 				print ">> [ERROR] Can't find '%s'"% self.entryConfig.get()
 				return
+		elif self.whichConfig['elComandante.conf']:
+			print '>> [INFO] Comming soon!'
 		self.lock()
 		self.isfixed=True
 
@@ -214,7 +216,10 @@ class interface():
 		return
 
 	def printConfig(self):
-		self.iniClass.callConfig()
+		if self.whichConfig['elComandante.ini']:
+			self.iniClass.callConfig()
+		if self.whichConfig['elComandante.conf']:
+			self.confClass.callConfig()
 		return
 
 	### Save button
@@ -223,7 +228,10 @@ class interface():
 		self.SAVE.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 
 	def saveConfig(self, output=None):
-		self.iniClass.makeConfig(output)
+		if self.whichConfig['elComandante.ini']:
+			self.iniClass.makeConfig(output)
+		if self.whichConfig['elComandante.conf']:
+			self.confClass.makeConfig(output)
 		return
 
 	### Add commend label 
@@ -670,10 +678,10 @@ class interface():
 		else:
 			self.entryConfig["bg"]=ENTRY_COLOR
 		self.entryConfig["width"]=15
-		self.entryConfig.insert(0, self.elcommandate_ini)
+		self.entryConfig.insert(0, self.confingurePath['elComandante.ini'])
 		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='ew' )
-		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig, self.elcommandate_ini))
-		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig,self.elcommandate_ini ))
+		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig, self.confingurePath['elComandante.ini']))
+		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig, self.confingurePath['elComandante.ini'] ))
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.reLoadConfig)
 		self.buttonReload["text"]="Load"
