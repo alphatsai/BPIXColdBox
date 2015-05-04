@@ -192,6 +192,7 @@ class interface():
 			if int(self.lastClickNewCycle) <= 10:
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
 				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
+				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
 	
 	def approchButton(self):
 		self.now = self.buttonLock['text']
