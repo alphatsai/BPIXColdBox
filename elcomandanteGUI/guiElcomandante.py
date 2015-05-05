@@ -1029,7 +1029,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER)
 		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow=1
@@ -1048,7 +1048,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER)
 		self.Subsysterm.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow
@@ -1102,7 +1102,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Transfer = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.Transfer = Frame( self.ElConf, bg=BG_MASTER)
 		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow=1
