@@ -1029,7 +1029,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER)
+		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow=1
@@ -1048,65 +1048,67 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER)
+		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.Subsysterm.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
-		startCol=0
-		self.addLabel( label='conf_Subsysterm', name1='subsystem', frame=self.Subsysterm, font=SECTION_FONT, column=startCol, row=0, sticky='ew' )
-		self.addLabel( label='conf_Subsysterm', name1='jumoClient',   frame=self.Subsysterm, font=SECTION_FONT, column=startCol+1, row=0, sticky='ew' )
-		self.addLabel( label='conf_Subsysterm', name1='keithleyClient', frame=self.Subsysterm, font=SECTION_FONT, column=startCol+2, row=0, sticky='ew' )
-		self.addLabel( label='conf_Subsysterm', name1='psiClient',       frame=self.Subsysterm, font=SECTION_FONT, column=startCol+3, row=0, sticky='ew' )
-		irow=1
-		icol=startCol
+		irow
+		icol=1
+		self.addLabel( label='conf_Subsysterm', name1='subsystem', frame=self.Subsysterm, font=SECTION_FONT, column=0, row=1, sticky='ew' )
 		for opt in self.confClass.list_Default['subsystem']:
 			if opt != 'Ziel' and opt != 'Port':
 				continue
 			value=self.confClass.Sections['subsystem'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
-			irow+=2
-		icol+=1
+			self.addLabel(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, row=0, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, value=value, row=1, column=icol, sticky='ew', classType=ISCONF)
+			icol+=1
 
-		irow=1
+		startCol=1
+		irow=4
+		icol=startCol
+		self.addLabel( label='conf_Subsysterm', name1='Clients', frame=self.Subsysterm, font=SECTION_FONT, column=0, row=irow-1, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='jumoClient',   frame=self.Subsysterm, font=SECTION_FONT, column=startCol, row=irow-2, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='keithleyClient', frame=self.Subsysterm, font=SECTION_FONT, column=startCol+1, row=irow-2, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='psiClient',       frame=self.Subsysterm, font=SECTION_FONT, column=startCol+2, row=irow-2, sticky='ew', columnspan=3 )
 		for opt in self.confClass.list_Default['jumoClient']:
 			if opt != 'port':
 				continue
 			value=self.confClass.Sections['jumoClient'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			self.addLabel(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF)
 			irow+=2
 		icol+=1
 
-		irow=1
+		irow=4
 		for opt in self.confClass.list_Default['keithleyClient']:
 			if opt != 'port':
 				continue
 			value=self.confClass.Sections['keithleyClient'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			self.addLabel(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF)
 			irow+=2
 		icol+=1
 	
-		irow=1
+		irow=4
 		for opt in self.confClass.list_Default['psiClient']:
 			value=self.confClass.Sections['psiClient'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			self.addLabel(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew', columnspan=3)
+			self.addOptEntry(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF, columnspan=3)
 			irow+=2
-		icol+=1
-		self.expendWindow(self.Subsysterm, 5, icol)
+		icol+=3
+		self.expendWindow(self.Subsysterm, 6, icol)
 
 		### Transfer = ['host', 'port', 'destination', 'user', 'checkFortar']
 		elconfRow+=1
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Transfer = Frame( self.ElConf, bg=BG_MASTER)
+		self.Transfer = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow=1
 		icol=1
 		self.addLabel( label='conf_Transfer', name1='Transfer', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
+		self.addLabel( label='conf_Transfer', name1='HideForAlignment', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow+2, sticky='ew', fg=BG_MASTER)
 		for opt in self.confClass.list_Default['Transfer']:
 			value=self.confClass.Sections['Transfer'][opt]
 			if opt == 'checkForTars':
@@ -1117,7 +1119,7 @@ class interface():
 				self.addOptEntry(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
 			icol+=1
 		irow+=1
-		self.expendWindow(self.Transfer, 5, icol)
+		self.expendWindow(self.Transfer, 5, icol-1)
 
 		# Pad 
 		elconfRow+=1
