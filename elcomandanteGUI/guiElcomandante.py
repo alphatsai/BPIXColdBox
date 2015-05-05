@@ -66,6 +66,7 @@ class interface():
 		self.whichConfig = { 'elComandante.ini':True,
 				     'elComandante.conf':False
 				   }
+		self.currentPath = self.confingurePath['elComandante.ini']
 		self.loadElcommandateIni();
 		self.loadElcommandateConf();
 	
@@ -117,6 +118,7 @@ class interface():
 				self.Labels[button].tkraise()
 				self.entryConfig.delete(0, END)
 				self.entryConfig.insert(0, self.confingurePath[button])
+				self.currentPath=self.confingurePath[button]
 			else:
 				self.framesButton[button]['bg']=ENTRY_LOCKED_COLOR
 				self.framesButton[button]['fg']=TITLE_COLOR
@@ -137,10 +139,14 @@ class interface():
 				# refresh option entries
 				for name in self.OptEntries:
 					entry = self.OptEntries[name]
+					classType = name.split('_')[0]
 					section = name.split('_')[2]
 					option = name.split('_')[3]
-					entry.delete(0, END)
-					entry.insert(0, self.iniClass.Sections[section][option])
+					if classType == 'ini':
+						entry.delete(0, END)
+						entry.insert(0, self.iniClass.Sections[section][option])
+					else:
+						continue
 				# refresh add new test entry
 				self.lastClickNewTest='Ex: IV@10'
 				self.Entries['ini_Process_Tests_NewTest'].delete(0,END)
@@ -762,8 +768,8 @@ class interface():
 		self.entryConfig["width"]=15
 		self.entryConfig.insert(0, self.confingurePath['elComandante.ini'])
 		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='ew' )
-		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig, self.confingurePath['elComandante.ini']))
-		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig, self.confingurePath['elComandante.ini'] ))
+		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig, self.currentPath ))
+		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig, self.currentPath ))
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.reLoadConfig)
 		self.buttonReload["text"]="Load"
@@ -858,7 +864,7 @@ class interface():
 
 		startCol=0
 		self.addLabel( label='ini_Device', name1='CoolingBox', frame=self.Device, font=SECTION_FONT, column=startCol, row=0, sticky='ew' )
-		self.addLabel( label='ini_Device', name1='Keithley',   frame=self.Device, font=SECTION_FONT, column=startCol+1, row=0, sticky='ew', columnspan=1 )
+		self.addLabel( label='ini_Device', name1='Keithley',   frame=self.Device, font=SECTION_FONT, column=startCol+1, row=0, sticky='ew' )
 		self.addLabel( label='ini_Device', name1='LowVoltage', frame=self.Device, font=SECTION_FONT, column=startCol+2, row=0, sticky='ew' )
 		self.addLabel( label='ini_Device', name1='Xray',       frame=self.Device, font=SECTION_FONT, column=startCol+3, row=0, sticky='ew' )
 		irow=1
@@ -1022,17 +1028,85 @@ class interface():
 		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER)
 		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
-		startCol=0
 		irow=1
-		icol=startCol+1
-		self.addLabel( label='conf_DTB', name1='TestboardAddress', frame=self.DTBAddress, font=SECTION_FONT, column=startCol, row=irow, sticky='ew' )
+		icol=1
+		self.addLabel( label='conf_DTB', name1='TestboardAddress', frame=self.DTBAddress, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
 		for opt in self.confClass.list_Default['TestboardAddress']:
 			value=self.confClass.Sections['TestboardAddress'][opt]
-			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=2)
-			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=2, classType=ISCONF)
-			icol+=2
+			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=3)
+			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=3, classType=ISCONF, width=15)
+			icol+=3
 		irow+=1
 		self.expendWindow(self.DTBAddress, irow, icol)
+
+		### Subsysterm = ['subsystem', 'jumoClient', 'keithleyClient', 'psiClient']
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER)
+		self.Subsysterm.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		startCol=0
+		self.addLabel( label='conf_Subsysterm', name1='subsystem', frame=self.Subsysterm, font=SECTION_FONT, column=startCol, row=0, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='jumoClient',   frame=self.Subsysterm, font=SECTION_FONT, column=startCol+1, row=0, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='keithleyClient', frame=self.Subsysterm, font=SECTION_FONT, column=startCol+2, row=0, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='psiClient',       frame=self.Subsysterm, font=SECTION_FONT, column=startCol+3, row=0, sticky='ew' )
+		irow=1
+		icol=startCol
+		for opt in self.confClass.list_Default['subsystem']:
+			if opt != 'Ziel' and opt != 'Port':
+				continue
+			value=self.confClass.Sections['subsystem'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			irow+=2
+		icol+=1
+
+		irow=1
+		for opt in self.confClass.list_Default['jumoClient']:
+			if opt != 'port':
+				continue
+			value=self.confClass.Sections['jumoClient'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			irow+=2
+		icol+=1
+
+		irow=1
+		for opt in self.confClass.list_Default['keithleyClient']:
+			if opt != 'port':
+				continue
+			value=self.confClass.Sections['keithleyClient'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			irow+=2
+		icol+=1
+	
+		irow=1
+		for opt in self.confClass.list_Default['psiClient']:
+			value=self.confClass.Sections['psiClient'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, row=irow, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, value=value, row=irow+1, column=icol, sticky='ew', classType=ISCONF)
+			irow+=2
+		icol+=1
+		self.expendWindow(self.Subsysterm, 5, icol)
+
+		### Transfer = ['host', 'port', 'destination', 'user', 'checkFortar']
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.Transfer = Frame( self.ElConf, bg=BG_MASTER)
+		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		# Pad 
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.expendWindow(self.ElConf, elconfRow, COLUMNMAX)
+
 
 		### * [END] elComandante_conf * -------------------------------------------------------------------------------------------------------
 
