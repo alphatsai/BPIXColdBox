@@ -154,9 +154,13 @@ class interface():
 				# refresh BoolButtons 
 				for name in self.BoolButtons:
 					button = self.BoolButtons[name]
+					classType = name.split('_')[0]
 					section = name.split('_')[2]
 					option = name.split('_')[3]
-					self.fillBoolName(button, section, option, self.iniClass.Sections[section][option])
+					if classType == 'ini':
+						self.fillBoolName(button, section, option, self.iniClass.Sections[section][option])
+					else:
+						continue
 				# refresh menu 
 				for name in self.Menu:
 					menu = self.Menu[name]
@@ -355,7 +359,7 @@ class interface():
 		return	
 
 	### Add button for bool options from configure file 
-	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, columnspan=1, value='', sticky='wn', width=5):
+	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, columnspan=1, value='', sticky='wn', width=5, classType=ISINI):
 		term1=""
 		term2=""
 		if label!="" :
@@ -368,7 +372,7 @@ class interface():
 		newButton['width'] =width
 		newButton['fg']=TITLE4_COLOR
 		newButton['font']=BUTTON_FONT
-		newButton['command']=lambda:self.changeBool( name, name0, name1 )
+		newButton['command']=lambda:self.changeBool( name, name0, name1, classType )
 		self.fillBoolName(newButton, name0, name1, value)
 		newButton.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
 		self.BoolButtons[name]=newButton
@@ -1033,9 +1037,9 @@ class interface():
 		self.addLabel( label='conf_DTB', name1='TestboardAddress', frame=self.DTBAddress, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
 		for opt in self.confClass.list_Default['TestboardAddress']:
 			value=self.confClass.Sections['TestboardAddress'][opt]
-			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=3)
-			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=3, classType=ISCONF, width=15)
-			icol+=3
+			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=1)
+			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
+			icol+=1
 		irow+=1
 		self.expendWindow(self.DTBAddress, irow, icol)
 
@@ -1100,13 +1104,27 @@ class interface():
 		self.Transfer = Frame( self.ElConf, bg=BG_MASTER)
 		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
+		irow=1
+		icol=1
+		self.addLabel( label='conf_Transfer', name1='Transfer', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
+		for opt in self.confClass.list_Default['Transfer']:
+			value=self.confClass.Sections['Transfer'][opt]
+			if opt == 'checkForTars':
+				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow+1, column=1, sticky='ew', columnspan=1)
+				self.addBoolButton( label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow+2, column=1, sticky='ew', classType=ISCONF, columnspan=1)
+			else:
+				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow-1, column=icol, sticky='ew', columnspan=1)
+				self.addOptEntry(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
+			icol+=1
+		irow+=1
+		self.expendWindow(self.Transfer, 5, icol)
+
 		# Pad 
 		elconfRow+=1
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
 		self.expendWindow(self.ElConf, elconfRow, COLUMNMAX)
-
 
 		### * [END] elComandante_conf * -------------------------------------------------------------------------------------------------------
 
