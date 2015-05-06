@@ -1260,7 +1260,9 @@ class interface():
 
 		value = self.confClass.Sections['Directories']['defaultParameters']
 		self.addOptEntry(label='conf_Directories', name0='Directories', name1='defaultParameters', frame=self.Directories, value=value, row=2, column=1, sticky='nsew', rowspan=2, columnspan=2, classType=ISCONF)
+		value = self.confClass.Sections['defaultParameters']['Full']
 		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, value=value, row=2, column=4, sticky='ew', classType=ISCONF)
+		value = self.confClass.Sections['defaultParameters']['Roc']
 		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, value=value, row=3, column=4, sticky='ew', classType=ISCONF)
 
 		value = self.confClass.Sections['Directories']['testDefinitions']
