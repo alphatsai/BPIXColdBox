@@ -175,11 +175,47 @@ class interface():
 						self.setCycleVar( menu, var, section, option, self.iniClass.Sections[section][option])
 					elif section == 'ModuleType':
 						self.setTypeVar( menu, var, section, option, self.iniClass.Sections[section][option])
+				self.currentPath = self.confingurePath['elComandante.ini']
 			else:
 				print ">> [ERROR] Can't find '%s'"% self.entryConfig.get()
 				return
 		elif self.whichConfig['elComandante.conf']:
-			print '>> [INFO] Comming soon!'
+			if os.path.isfile( self.entryConfig.get() ):
+				self.confingurePath['elComandante.conf'] = self.entryConfig.get()
+				self.loadElcommandateConf()
+				# refresh option entries
+				for name in self.OptEntries:
+					entry = self.OptEntries[name]
+					classType = name.split('_')[0]
+					section = name.split('_')[2]
+					option = name.split('_')[3]
+					if classType == 'conf':
+						entry.delete(0, END)
+						entry.insert(0, self.confClass.Sections[section][option])
+					else:
+						continue
+				# refresh BoolButtons 
+				for name in self.BoolButtons:
+					button = self.BoolButtons[name]
+					classType = name.split('_')[0]
+					section = name.split('_')[2]
+					option = name.split('_')[3]
+					if classType == 'conf':
+						self.fillBoolName(button, section, option, self.confClass.Sections[section][option])
+					else:
+						continue
+				# refresh dir menu and entry
+				for name in self.Menu:
+					menu = self.Menu[name]
+					var = self.Var[name]
+					section = name.split('_')[2]
+					option = name.split('_')[3]
+					if section == 'Directories':
+						self.setDirVar( menu, var, name, self.confClass.Sections[section][option])
+				self.currentPath = self.confingurePath['elComandante.conf']
+			else:
+				print ">> [ERROR] Can't find '%s'"% self.entryConfig.get()
+				return
 		self.lock()
 		self.isfixed=True
 
@@ -210,14 +246,6 @@ class interface():
 			self.unTouchDir('conf_Directories_Directories_testDefinitions')
 			self.unTouchDir('conf_Directories_Directories_dataDir')
 	
-	def approchButton(self):
-		self.now = self.buttonLock['text']
-		if self.now == 'Locked':
-			self.buttonLock['text']='Unlock'
-		elif self.now == 'Unlocked':
-			self.buttonLock['text']='Lock'
-		return
-
 	### Quit button
 	def addQUIT(self, frame, row=0, column=0, text="QUIT", bg=QUIT_COLOR, font=BUTTON2_FONT, columnspan=1, sticky='se', width=5):
 		self.QUIT = Button(frame, font=font, bg=bg, width=width, text=text, command=self.quit, fg=TITLE4_COLOR)
@@ -1177,7 +1205,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER)
+		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow=1
@@ -1196,7 +1224,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER)
+		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.Subsysterm.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow
@@ -1250,7 +1278,7 @@ class interface():
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Directories = Frame( self.ElConf, bg=BG_MASTER)
+		self.Directories = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.Directories.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		self.addLabel( label='conf_Directories', name1='Directories', frame=self.Directories, font=SECTION_FONT, column=0, row=1, sticky='ew' )
@@ -1261,7 +1289,7 @@ class interface():
 		value = self.confClass.Sections['Directories']['defaultParameters']
 		self.addOptEntry(label='conf_Directories', name0='Directories', name1='defaultParameters', frame=self.Directories, value=value, row=2, column=1, sticky='nsew', rowspan=2, columnspan=2, classType=ISCONF)
 		value = self.confClass.Sections['defaultParameters']['Full']
-		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, value=value, row=2, column=4, sticky='ew', classType=ISCONF)
+		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, value=value, row=2, column=4, sticky='ew', classType=ISCONF, width=15)
 		value = self.confClass.Sections['defaultParameters']['Roc']
 		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, value=value, row=3, column=4, sticky='ew', classType=ISCONF)
 
@@ -1284,16 +1312,15 @@ class interface():
 		self.Entries['conf_Directories_Directories_dataDir'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
 		self.Entries['conf_Directories_Directories_dataDir'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_dataDir'))
 		self.Menu['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
-		irow+=2
 
-		self.expendWindow(self.Directories, 2, 5)
+		self.expendWindow(self.Directories, 5, 5)
 
 		### Transfer = ['host', 'port', 'destination', 'user', 'checkFortar']
 		elconfRow+=1
 		self.addXpad( self.ElConf, row=elconfRow)
 
 		elconfRow+=1
-		self.Transfer = Frame( self.ElConf, bg=BG_MASTER)
+		self.Transfer = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
 		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		irow=1
