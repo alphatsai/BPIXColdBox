@@ -34,7 +34,7 @@ SAVE_COLOR='goldenrod1'
 QUIT_COLOR='IndianRed2'
 MENU_FULL_COLOR='LightSteelBlue1'
 MENU_ROC_COLOR='light slate blue'
-BYTYPING_COLOR='khaki1'
+TYPING_COLOR='khaki1'
 ENTRY_COLOR='snow'
 ENTRY_LOCKED_COLOR='light grey'
 
@@ -57,6 +57,8 @@ class interface():
 		self.OptEntries={}
 		self.BoolButtons={}
 		self.testButtons={}
+		self.lastTestDirEntry={}
+		self.lastTestDirMenu={}
 		self.Menu={}
 		self.Var={}
 		self.testPath='./example/tests'
@@ -205,6 +207,8 @@ class interface():
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
 				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
 				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
+			self.unTouchDir('conf_Directories_Directories_testDefinitions')
+			self.unTouchDir('conf_Directories_Directories_dataDir')
 	
 	def approchButton(self):
 		self.now = self.buttonLock['text']
@@ -297,7 +301,7 @@ class interface():
 				newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1], True))
 				newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
 			else:
-				newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry,self.iniClass.Sections[name0][name1] ))
+				newEntry.bind('<Key>', lambda event:self.changeEntryBG(newEntry,self.iniClass.Sections[name0][name1] ))
 				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
 				newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
 				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
@@ -308,7 +312,7 @@ class interface():
 				newEntry.bind('<Return>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1], True))
 				newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1]))
 			else:
-				newEntry.bind('<Key>', lambda event:self.chEntryBG(newEntry,self.confClass.Sections[name0][name1] ))
+				newEntry.bind('<Key>', lambda event:self.changeEntryBG(newEntry,self.confClass.Sections[name0][name1] ))
 				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1] ))
 				newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1, ISCONF ))
 				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1] ))
@@ -316,11 +320,11 @@ class interface():
 		self.OptEntries[name]=newEntry
 		return
 
-	def chEntryBG(self, entry, value, murmur=True):
+	def changeEntryBG(self, entry, value, murmur=True):
 		if self.isfixed:
 			self.unTouchEntry(entry, value, murmur)
 			return
-		entry['bg']=BYTYPING_COLOR
+		entry['bg']=TYPING_COLOR
 		return
 
 	def checkChanging(self, entry, value, murmur=False):
@@ -390,27 +394,27 @@ class interface():
 			button['bg']=TRUE_COLOR
 		return
 
-	def changeBool(self, name, selction, option, classType=ISINI):
+	def changeBool(self, name, section, option, classType=ISINI):
 		if self.isfixed:
 			print '>> [INFO] The button is locked!'
 			return
 			
 		if self.BoolButtons[name]['text'] == "OFF":
-			print ">> [INFO] Change %s : %s : False -> True "%(selction, option)
+			print ">> [INFO] Change %s : %s : False -> True "%(section, option)
 			self.BoolButtons[name]['text']="ON"
 			self.BoolButtons[name]['bg']=TRUE_COLOR
 			if classType == ISINI:
-				self.iniClass.changeOptValue(selction,option,"True")
+				self.iniClass.changeOptValue(section,option,"True")
 			if classType == ISCONF:
-				self.confClass.changeOptValue(selction,option,"True")
+				self.confClass.changeOptValue(section,option,"True")
 		else:
-			print ">> [INFO] Change %s : %s : %s -> False "%(selction, option, self.BoolButtons[name]['text'] )
+			print ">> [INFO] Change %s : %s : %s -> False "%(section, option, self.BoolButtons[name]['text'] )
 			self.BoolButtons[name]['text']="OFF"
 			self.BoolButtons[name]['bg']=FALSE_COLOR
 			if classType == ISINI:
-				self.iniClass.changeOptValue(selction,option,"False")
+				self.iniClass.changeOptValue(section,option,"False")
 			if classType == ISCONF:
-				self.confClass.changeOptValue(selction,option,"False")
+				self.confClass.changeOptValue(section,option,"False")
 		return
 
 	### Add button for Tests options from configure file 
@@ -549,7 +553,7 @@ class interface():
 			return
 
 		if action == 0: #<Button-1>
-			self.Entries['ini_Process_Tests_Test']['bg']=BYTYPING_COLOR
+			self.Entries['ini_Process_Tests_Test']['bg']=TYPING_COLOR
 		elif action == 1: #<Leave>
 			self.Entries['ini_Process_Tests_Test']['bg']=ENTRY_COLOR
 		
@@ -588,17 +592,17 @@ class interface():
 			menu['bg'] = MENU_FULL_COLOR
 			var.set(str(int(float(value)*2))+' Sec.')
 
-	def chooseDelay(self, menu, sec, selction, option, var):
+	def chooseDelay(self, menu, sec, section, option, var):
 		if self.isfixed:
 			print '>> [INFO] The menu is locked!'
 			return
 
-		value = self.iniClass.Sections[selction][option]
+		value = self.iniClass.Sections[section][option]
 		if float(value)*2 != sec:
-			print ">> [INFO] Change %s : %s : %s(%2.0f sec) -> %s(%2.0f sec) "%(selction, option, value, float(value)*2, str(sec/2), sec)
+			print ">> [INFO] Change %s : %s : %s(%2.0f sec) -> %s(%2.0f sec) "%(section, option, value, float(value)*2, str(sec/2), sec)
 			menu['bg'] = MENU_FULL_COLOR
 			var.set(str(int(sec))+' Sec.')
-			self.iniClass.changeOptValue(selction,option, str(sec/2))
+			self.iniClass.changeOptValue(section,option, str(sec/2))
 		return
 
 	### Add Menu for times of thermal cycle from configure file 
@@ -649,20 +653,20 @@ class interface():
 			var.set(str(int(value)))
 		return
 
-	def chooseCycle(self, menu, label, selction, option, var):
+	def chooseCycle(self, menu, label, section, option, var):
 		if self.isfixed:
 			print '>> [INFO] The menu is locked!'
 			return
-		value = self.iniClass.Sections[selction][option]
+		value = self.iniClass.Sections[section][option]
 		if value != label:
 			var.set(label)
 			if label == 'Other':
 				menu['bg'] = FALSE_COLOR
 				self.Entries['ini_Process_Cycle_Other'].tkraise()
 			else:
-				print ">> [INFO] Change %s : %s : %s -> %s "%(selction, option, value, label)
+				print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, value, label)
 				menu['bg'] = MENU_FULL_COLOR
-				self.iniClass.changeOptValue(selction,option,label)
+				self.iniClass.changeOptValue(section,option,label)
 				self.Entries['ini_Process_Cycle_Other'].delete(0, END)
 				self.Entries['ini_Process_Cycle_Other'].insert(0, '')
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
@@ -737,20 +741,163 @@ class interface():
 			var.set(value)
 		return
 
-	def chooseType(self, menu, label, selction, option, var):
+	def chooseType(self, menu, label, section, option, var):
 		if self.isfixed:
 			print '>> [INFO] The menu is locked!'
 			return
-		value = self.iniClass.Sections[selction][option]
+		value = self.iniClass.Sections[section][option]
 		if value != label:
-			print ">> [INFO] Change %s : %s : %s -> %s "%(selction, option, value, label)
+			print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, value, label)
 			if label == 'Full':
 				menu['bg'] = MENU_FULL_COLOR
 			if label == 'Roc':
 				menu['bg'] = MENU_ROC_COLOR
 			var.set(label)
-			self.iniClass.changeOptValue(selction,option,label)
+			self.iniClass.changeOptValue(section,option,label)
 		return
+
+	### Add Menu for testDefinetions from configure file 
+	def addTestDirMenu(self, frame, label="", name0="", name1="", row=0, column=0, columnspan=1, value='', sticky='wn', width=5):
+		term1=""
+		term2=""
+		if label!="" :
+			term1=label+"_"
+		if name0!="" :
+			term2=name0+"_"
+		name=term1+term2+name1
+
+		var=StringVar()
+		newMenu = OptionMenu( frame, var, () )
+		newMenu['width'] = width
+		newMenu['menu'].delete(0)
+		if name1 == 'testDefinitions':	
+			newMenu['menu'].add_command( label="$configDir", command=lambda:self.chooseTestDir( newMenu, '$configDir', name, name0, name1, var))
+			newMenu['menu'].add_command( label="Other",  command=lambda:self.chooseTestDir( newMenu, 'Other', name, name0, name1, var,))
+		if name1 == 'dataDir':
+			newMenu['menu'].add_command( label="$baseDir", command=lambda:self.chooseTestDir( newMenu, '$baseDir', name, name0, name1, var))
+			newMenu['menu'].add_command( label="Other",  command=lambda:self.chooseTestDir( newMenu, 'Other', name, name0, name1, var,))
+	
+		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+		self.setDirVar( newMenu, var, name, value)
+		self.Menu[name]=newMenu
+		self.Var[name]=var
+	
+	def setDirVar(self, menu, var, name, value):
+		menu['bg'] = ERROR_COLOR
+		menu['fg']=TITLE4_COLOR
+		menu['font']=BUTTON_FONT
+		terms = value.strip().split('/')
+		if terms[0]=='$configDir$':
+			menu['bg'] = MENU_FULL_COLOR
+			var.set('$configDir')
+			entry=''
+			for term in terms:
+				if term != '$configDir$':
+					entry+='/'+term
+			self.Entries[name].delete(0, END)
+			self.Entries[name].insert(0, entry)
+			self.lastTestDirEntry[name]=entry
+			self.lastTestDirMenu[name]='$configDir'
+		elif terms[0]=='<!Directories|baseDir!>':
+			menu['bg'] = MENU_FULL_COLOR
+			var.set('$baseDir')
+			entry=''
+			for term in terms:
+				if term != '<!Directories|baseDir!>':
+					entry+='/'+term
+			self.Entries[name].delete(0, END)
+			self.Entries[name].insert(0, entry)
+			self.lastTestDirEntry[name]=entry
+			self.lastTestDirMenu[name]='$baseDir'
+		else:
+			menu['bg'] = FALSE_COLOR
+			var.set('Other')
+			self.Entries[name].delete(0, END)
+			self.Entries[name].insert(0, value)
+			self.lastTestDirEntry[name]=value
+			self.lastTestDirMenu[name]='Other'
+		return
+
+	def chooseTestDir(self, menu, label, name, section, option, var):
+		if self.isfixed:
+			print '>> [INFO] The menu is locked!'
+			return
+
+		#if label == '$configDir':
+		self.Entries[name]['bg']=TYPING_COLOR
+		menu['bg'] = TYPING_COLOR
+		var.set(label)
+		return
+			 
+	def unTouchDir(self, name, murmur=False ):
+		if murmur:
+			print '>> [INFO] The all dir is locked!'
+
+		menu = self.Menu[name]
+		var = self.Var[name]
+		var.set(self.lastTestDirMenu[name])
+		if var.get() == 'Other':
+			menu['bg']=FALSE_COLOR
+		else:
+			menu['bg']=MENU_FULL_COLOR
+		entry = self.Entries[name]
+		entry.delete(0, END)
+		entry.insert(0, self.lastTestDirEntry[name])
+		return
+	
+	def changeDirBG(self, name, murmur=True):
+		if self.isfixed:
+			self.unTouchDir(name, murmur)
+			return
+		menu = self.Menu[name]
+		entry = self.Entries[name]
+		menu['bg']=TYPING_COLOR
+		entry['bg']=TYPING_COLOR
+		return
+
+	def checkDirChanging(self, name, murmur=False):
+		if self.isfixed:
+			self.unTouchDir(name, murmur)
+			return
+		entry = self.Entries[name]
+		menu = self.Menu[name]
+		var = self.Var[name]
+		if self.lastTestDirMenu[name] == var.get() and self.lastTestDirEntry[name] == entry.get():
+			entry['bg']=ENTRY_COLOR
+			if var.get() == 'Other':
+				menu['bg'] = FALSE_COLOR
+			else:	
+				menu['bg'] = MENU_FULL_COLOR
+		return
+
+	def confirmTestDir(self, name, murmur=True ):
+			if self.isfixed:
+				self.unTouchDir(name, murmur)
+				return
+			section = name.split('_')[2]
+			option = name.split('_')[3]
+			value = self.confClass.Sections[section][option]
+			entry = self.Entries[name]
+			menu = self.Menu[name]
+			var = self.Var[name]
+			newvalue = '' 
+			if var.get() == '$configDir':
+				newvalue = '$configDir$'+entry.get()
+			elif var.get() == '$baseDir':
+				newvalue = '<!Directories|baseDir!>'+entry.get()
+			else:
+				newvalue = entry.get()
+
+			self.lastTestDirEntry[name]=entry.get()
+			self.lastTestDirMenu[name]=var.get()
+			if value != newvalue:
+				print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, value, newvalue)
+				entry['bg']=ENTRY_COLOR
+				self.confClass.changeOptValue(section,option,newvalue)
+				return
+			else:
+				entry['bg']=ENTRY_COLOR
+				return
 
 	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
@@ -772,7 +919,7 @@ class interface():
 		self.entryConfig["width"]=15
 		self.entryConfig.insert(0, self.confingurePath['elComandante.ini'])
 		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='ew' )
-		self.entryConfig.bind('<Key>', lambda event:self.chEntryBG(self.entryConfig, self.currentPath ))
+		self.entryConfig.bind('<Key>', lambda event:self.changeEntryBG(self.entryConfig, self.currentPath ))
 		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig, self.currentPath ))
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.reLoadConfig)
@@ -937,7 +1084,7 @@ class interface():
 		# spacial iterm for adding new cycles 
 		self.Labels['ini_Process_Cycle_HideOther'].grid( row=irow, column=icol)
 		self.Entries['ini_Process_Cycle_Other'].grid( row=irow, column=icol)
-		self.Entries['ini_Process_Cycle_Other'].bind('<Key>', lambda event:self.chEntryBG(self.Entries['ini_Process_Cycle_Other'], self.lastClickNewCycle))
+		self.Entries['ini_Process_Cycle_Other'].bind('<Key>', lambda event:self.changeEntryBG(self.Entries['ini_Process_Cycle_Other'], self.lastClickNewCycle))
 		self.Entries['ini_Process_Cycle_Other'].bind('<Leave>', lambda event:self.checkChanging(self.Entries['ini_Process_Cycle_Other'],self.lastClickNewCycle ))
 		self.Entries['ini_Process_Cycle_Other'].bind('<FocusOut>', lambda event:self.checkChanging(self.Entries['ini_Process_Cycle_Other'],self.lastClickNewCycle ))
 		self.Entries['ini_Process_Cycle_Other'].bind('<FocusOut>', lambda event:self.checkEmpty(self.Entries['ini_Process_Cycle_Other']))
@@ -978,7 +1125,7 @@ class interface():
 				# spacial iterm for adding new test 
 				self.addEntry(label='ini_Process', name0='Tests', name1='NewTest', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
 				self.lastClickNewTest='Ex: IV@10'
-				self.Entries['ini_Process_Tests_NewTest'].bind('<Key>', lambda event:self.chEntryBG(self.Entries['ini_Process_Tests_NewTest'], self.lastClickNewTest))
+				self.Entries['ini_Process_Tests_NewTest'].bind('<Key>', lambda event:self.changeEntryBG(self.Entries['ini_Process_Tests_NewTest'], self.lastClickNewTest))
 				self.Entries['ini_Process_Tests_NewTest'].bind('<Leave>', lambda event:self.checkChanging(self.Entries['ini_Process_Tests_NewTest'],self.lastClickNewTest ))
 				self.Entries['ini_Process_Tests_NewTest'].bind('<FocusOut>', lambda event:self.checkChanging(self.Entries['ini_Process_Tests_NewTest'],self.lastClickNewTest ))
 				self.Entries['ini_Process_Tests_NewTest'].bind('<Return>', lambda event:self.activeTestButton(self.testButtons["ini_Process_Tests_Add new test"]))
@@ -1097,6 +1244,39 @@ class interface():
 		icol+=3
 		self.expendWindow(self.Subsysterm, 6, icol)
 
+		### Directories = ['testDefinitions', 'dataDir', 'defaultParameters' ]
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.Directories = Frame( self.ElConf, bg=BG_MASTER)
+		self.Directories.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		self.addLabel( label='conf_Directories', name1='Directories', frame=self.Directories, font=SECTION_FONT, column=0, row=1, sticky='ew' )
+
+		value = self.confClass.Sections['Directories']['testDefinitions']
+		self.addLabel(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, row=0, column=1, sticky='ew', columnspan=2)
+		self.addEntry(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, value='', row=1, column=2, sticky='ew')
+		self.addTestDirMenu( label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, value=value, row=1, column=1, sticky='ew')
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Key>', lambda event:self.changeDirBG('conf_Directories_Directories_testDefinitions'))
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_testDefinitions'))
+		self.Menu['conf_Directories_Directories_testDefinitions'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
+
+		value = self.confClass.Sections['Directories']['dataDir']
+		self.addLabel(label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, row=0, column=3, sticky='ew', columnspan=2)
+		self.addEntry(label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, value='', row=1, column=4, sticky='ew', width=15)
+		self.addTestDirMenu( label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, value=value, row=1, column=3, sticky='ew')
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<Key>', lambda event:self.changeDirBG('conf_Directories_Directories_dataDir'))
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_dataDir'))
+		self.Menu['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
+		irow+=2
+
+		self.expendWindow(self.Directories, 2, 5)
+
 		### Transfer = ['host', 'port', 'destination', 'user', 'checkFortar']
 		elconfRow+=1
 		self.addXpad( self.ElConf, row=elconfRow)
@@ -1114,10 +1294,11 @@ class interface():
 			if opt == 'checkForTars':
 				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow+1, column=1, sticky='ew', columnspan=1)
 				self.addBoolButton( label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow+2, column=1, sticky='ew', classType=ISCONF, columnspan=1)
+				icol+=1
 			else:
 				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow-1, column=icol, sticky='ew', columnspan=1)
 				self.addOptEntry(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
-			icol+=1
+				icol+=1
 		irow+=1
 		self.expendWindow(self.Transfer, 5, icol-1)
 
