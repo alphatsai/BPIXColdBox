@@ -269,7 +269,7 @@ class interface():
 		return
 
 	### Add commend entry 
-	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, fg='black' ):
+	def addEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, rowspan=1, fg='black' ):
 		term1=""
 		term2=""
 		if label!="" :
@@ -286,13 +286,13 @@ class interface():
 		else:
 			newEntry['bg']=ENTRY_COLOR
 		newEntry.insert(0, value)
-		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
+		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan, rowspan=rowspan)
 		self.Entries[name]=newEntry
 		return name
 
 	### Add entry for options from configure file 
-	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, isFixed=False, classType=ISINI ):
-		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan)
+	def addOptEntry(self, frame, label="", name0="", name1="", value="" , row=0, column=0, width=10, sticky='nsew', columnspan=1, rowspan=1, isFixed=False, classType=ISINI ):
+		name = self.addEntry(frame, label, name0, name1, value, row, column, width, sticky, columnspan, rowspan=rowspan)
 		newEntry = self.Entries[name]
 		if classType == ISINI:
 			if isFixed:
@@ -921,6 +921,7 @@ class interface():
 		self.entryConfig.grid(row=mainRow, column=2, columnspan=3, sticky='ew' )
 		self.entryConfig.bind('<Key>', lambda event:self.changeEntryBG(self.entryConfig, self.currentPath ))
 		self.entryConfig.bind('<Leave>', lambda event:self.checkChanging(self.entryConfig, self.currentPath ))
+		self.entryConfig.bind('<FocusOut>', lambda event:self.checkChanging(self.entryConfig, self.currentPath ))
 
 		self.buttonReload = Button(self.master, bg=RELOAD_COLOR, font=BUTTON2_FONT, fg=TITLE4_COLOR, command=self.reLoadConfig)
 		self.buttonReload["text"]="Load"
@@ -1244,7 +1245,7 @@ class interface():
 		icol+=3
 		self.expendWindow(self.Subsysterm, 6, icol)
 
-		### Directories = ['testDefinitions', 'dataDir', 'defaultParameters' ]
+		### Directories = ['testDefinitions', 'dataDir', 'defaultParameters' ] and defaultParameters = [Full, Roc]
 		elconfRow+=1
 		self.addXpad( self.ElConf, row=elconfRow)
 
@@ -1253,6 +1254,14 @@ class interface():
 		self.Directories.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
 
 		self.addLabel( label='conf_Directories', name1='Directories', frame=self.Directories, font=SECTION_FONT, column=0, row=1, sticky='ew' )
+		self.addLabel( label='conf_Directories', name1='defaultParameters', frame=self.Directories, font=SECTION_FONT, column=0, row=2, sticky='nsew', rowspan=2 )
+		self.addLabel( label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, font=SECTION_FONT, column=3, row=2, sticky='ew', bg=MENU_FULL_COLOR )
+		self.addLabel( label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, font=SECTION_FONT, column=3, row=3, sticky='ew', bg=MENU_ROC_COLOR  )
+
+		value = self.confClass.Sections['Directories']['defaultParameters']
+		self.addOptEntry(label='conf_Directories', name0='Directories', name1='defaultParameters', frame=self.Directories, value=value, row=2, column=1, sticky='nsew', rowspan=2, columnspan=2, classType=ISCONF)
+		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, value=value, row=2, column=4, sticky='ew', classType=ISCONF)
+		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, value=value, row=3, column=4, sticky='ew', classType=ISCONF)
 
 		value = self.confClass.Sections['Directories']['testDefinitions']
 		self.addLabel(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, row=0, column=1, sticky='ew', columnspan=2)
