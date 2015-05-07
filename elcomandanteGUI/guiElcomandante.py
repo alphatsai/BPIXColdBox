@@ -59,6 +59,7 @@ class interface():
 		self.testButtons={}
 		self.lastTestDirEntry={}
 		self.lastTestDirMenu={}
+		self.hasError=False
 		self.Menus={}
 		self.Vars={}
 		self.configDir = './example'
@@ -145,6 +146,9 @@ class interface():
 					option = name.split('_')[3]
 					if classType == 'ini':
 						entry.delete(0, END)
+						if option == 'Test' and section == 'Tests':
+							if not self.checkProcess(self.iniClass.Sections[section][option]):
+								entry['bg'] = ERROR_COLOR
 						entry.insert(0, self.iniClass.Sections[section][option])
 					else:
 						continue
@@ -244,6 +248,8 @@ class interface():
 			self.entryConfig['bg']=ENTRY_COLOR
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_COLOR
+				if self.hasError:
+					self.Entries['ini_Process_Tests_Test']['bg']=ERROR_COLOR
 		# Locked
 		else:
 			self.isfixed=True
@@ -253,6 +259,8 @@ class interface():
 			self.entryConfig['bg']=ENTRY_LOCKED_COLOR
 			for entry in self.Entries:
 				self.Entries[entry]['bg']=ENTRY_LOCKED_COLOR
+				if self.hasError:
+					self.Entries['ini_Process_Tests_Test']['bg']=ERROR_COLOR
 			if int(self.lastClickNewCycle) <= 10:
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
 				self.Vars['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
@@ -327,6 +335,11 @@ class interface():
 			newEntry['bg']=ENTRY_LOCKED_COLOR
 		else:
 			newEntry['bg']=ENTRY_COLOR
+
+		if name1 == 'Test' and name0 == 'Tests':
+			if not self.checkProcess(value):
+				newEntry['bg'] = ERROR_COLOR
+	
 		newEntry.insert(0, value)
 		newEntry.grid( row=row, column=column, sticky=sticky, columnspan=columnspan, rowspan=rowspan)
 		self.Entries[name]=newEntry
@@ -344,9 +357,9 @@ class interface():
 				newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.iniClass.Sections[name0][name1]))
 			else:
 				newEntry.bind('<Key>', lambda event:self.changeEntryBG(newEntry,self.iniClass.Sections[name0][name1] ))
-				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1], name ))
 				newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1 ))
-				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1] ))
+				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.iniClass.Sections[name0][name1],name ))
 		if classType == ISCONF:
 			if isFixed:
 				newEntry.bind('<Key>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1], True))
@@ -355,9 +368,9 @@ class interface():
 				newEntry.bind('<FocusOut>', lambda event:self.unTouchEntry(newEntry, self.confClass.Sections[name0][name1]))
 			else:
 				newEntry.bind('<Key>', lambda event:self.changeEntryBG(newEntry,self.confClass.Sections[name0][name1] ))
-				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1] ))
+				newEntry.bind('<Leave>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1],name ))
 				newEntry.bind('<Return>', lambda event:self.ConfirmChangeOpt(newEntry, name0, name1, ISCONF ))
-				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1] ))
+				newEntry.bind('<FocusOut>', lambda event:self.checkChanging(newEntry, self.confClass.Sections[name0][name1],name ))
 		self.Entries[name]=newEntry
 		self.OptEntries[name]=newEntry
 		return
@@ -369,12 +382,16 @@ class interface():
 		entry['bg']=TYPING_COLOR
 		return
 
-	def checkChanging(self, entry, value, murmur=False):
+	def checkChanging(self, entry, value, name='', murmur=False ):
 		if self.isfixed:
 			self.unTouchEntry(entry, value, murmur)
 			return
+		if name == 'ini_Process_Tests_Test':
+			if self.hasError:
+				return
 		if value == entry.get():
 			entry['bg']=ENTRY_COLOR
+
 		return
 
 	def ConfirmChangeOpt(self, entry, section, option, classType=ISINI, murmur=True):
@@ -403,6 +420,24 @@ class interface():
 		entry.delete(0, END)
 		entry.insert(0, value)
 		return	
+
+	def checkProcess(self, process):
+		newProcess = ''
+		size = len(process.split(','))
+		i=1
+		error=False
+		for tests in process.split(','):
+			test = tests.split('@')[0]
+			if test not in self.tests and test != 'IV' and test != 'Cycle':
+				print ">> [ERROR] Can't find '"+test+"' in '"+self.testDefinePath+"'"
+				print ">>         Please check the test name"
+				error=True
+		if not error:
+			self.hasError=False
+			return True
+		else:
+			self.hasError=True
+			return False
 
 	### Add button for bool options from configure file 
 	def addBoolButton(self, frame, label="", name0="", name1="", row=0, column=0, columnspan=1, value='', sticky='wn', width=5, classType=ISINI):
@@ -506,6 +541,7 @@ class interface():
 			self.iniClass.changeOptValue('Tests','Test', '')
 			print ">> [INFO] Clear Tests! "
 			print ">>        Changed Tests : "
+			self.hasError=False
 			return
 
 		tests = self.Entries['ini_Process_Tests_Test'].get()
@@ -529,6 +565,8 @@ class interface():
 			self.iniClass.changeOptValue('Tests','Test', restTests)
 			print ">> [INFO] Delete a test '%s'"%(delTest)
 			print ">>        Changed Tests %s: "%(restTests)
+			if not self.checkProcess(restTests):
+				self.Entries['ini_Process_Tests_Test']['bg'] = ERROR_COLOR
 			return
 
 		newprocess=''
@@ -546,6 +584,8 @@ class interface():
 					print '>> [ERROR] Too many arguments'
 					print '>>         E.x: Fulltest@17,IV@10'
 					self.lastClickNewTest=''
+					if not self.checkProcess(tests):
+						self.Entries['ini_Process_Tests_Test']['bg'] = ERROR_COLOR
 					return
 				elif len(newtests) == 2:
 					temperature = newtests[1]
@@ -554,6 +594,8 @@ class interface():
 						print '>> [ERROR] After @ shall be digit, i.e temperature'
 						print '>>         E.x: Fulltest@17'
 						self.lastClickNewTest=''
+						if not self.checkProcess(tests):
+							self.Entries['ini_Process_Tests_Test']['bg'] = ERROR_COLOR
 						return
 
 				if newtest in self.tests or newtest == 'IV' or newtest == 'Cycle':
@@ -561,6 +603,8 @@ class interface():
 						self.Entries['ini_Process_Tests_NewTest']['bg']=ERROR_COLOR
 						print ">> [ERROR] Cycle shall not add @ and temperature"
 						self.lastClickNewTest=''
+						if not self.checkProcess(tests):
+							self.Entries['ini_Process_Tests_Test']['bg'] = ERROR_COLOR
 						return
 					
 					if len(newalltests) > 1 and i<len(newalltests):
@@ -574,6 +618,8 @@ class interface():
 					print ">> [ERROR] Not found '"+newtest+"' in "+self.testDefinePath
 					print ">>         Please add it in '"+self.testDefinePath+"' and reload"
 					self.lastClickNewTest=''
+					if not self.checkProcess(tests):
+						self.Entries['ini_Process_Tests_Test']['bg'] = ERROR_COLOR
 					return
 		else: 
 			newprocess = button['text']
@@ -588,6 +634,8 @@ class interface():
 		self.iniClass.changeOptValue('Tests','Test', tests)
 		print ">> [INFO] Add new process %s "%(newprocess)
 		print ">>        Changed Tests : %s "%(tests)
+		if not self.checkProcess(tests):
+			self.Entries['ini_Process_Tests_Test']['bg'] = ERROR_COLOR
 		return
 	
 	def changeColorTestEntry(self, action):
@@ -597,7 +645,10 @@ class interface():
 		if action == 0: #<Button-1>
 			self.Entries['ini_Process_Tests_Test']['bg']=TYPING_COLOR
 		elif action == 1: #<Leave>
-			self.Entries['ini_Process_Tests_Test']['bg']=ENTRY_COLOR
+			if not self.hasError:
+				self.Entries['ini_Process_Tests_Test']['bg']=ENTRY_COLOR
+			else:
+				return
 		
 	### Add Menu for delay measument IV from configure file 
 	def addDelayMenu(self, frame, label="", name0="", name1="", row=0, column=0, value='', nmax=Delay_MAX, sticky='wn', width=10):
@@ -1366,8 +1417,8 @@ class interface():
 				self.addEntry(label='ini_Process', name0='Tests', name1='NewTest', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
 				self.lastClickNewTest='Ex: IV@10'
 				self.Entries['ini_Process_Tests_NewTest'].bind('<Key>', lambda event:self.changeEntryBG(self.Entries['ini_Process_Tests_NewTest'], self.lastClickNewTest))
-				self.Entries['ini_Process_Tests_NewTest'].bind('<Leave>', lambda event:self.checkChanging(self.Entries['ini_Process_Tests_NewTest'],self.lastClickNewTest ))
-				self.Entries['ini_Process_Tests_NewTest'].bind('<FocusOut>', lambda event:self.checkChanging(self.Entries['ini_Process_Tests_NewTest'],self.lastClickNewTest ))
+				self.Entries['ini_Process_Tests_NewTest'].bind('<Leave>', lambda event:self.checkChanging(self.Entries['ini_Process_Tests_NewTest'],self.lastClickNewTest, 'ini_Process_Tests_NewTest' ))
+				self.Entries['ini_Process_Tests_NewTest'].bind('<FocusOut>', lambda event:self.checkChanging(self.Entries['ini_Process_Tests_NewTest'],self.lastClickNewTest, 'ini_Process_Tests_NewTest' ))
 				self.Entries['ini_Process_Tests_NewTest'].bind('<Return>', lambda event:self.activeTestButton(self.testButtons["ini_Process_Tests_Add new test"]))
 
 			elif opt == 'TestDescription':
