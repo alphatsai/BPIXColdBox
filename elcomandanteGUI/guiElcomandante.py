@@ -222,7 +222,7 @@ class interface():
 					if self.checkTests(button, tests):
 						button['bg']=FALSE_COLOR
 						button['text']=tests
-						button['command']=lambda:self.activeTestButton(button)
+						button['command']=lambda button=button:self.activeTestButton(button)
 						button.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
 						button.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
 
@@ -972,7 +972,7 @@ class interface():
 					if self.checkTests(button, tests):
 						button['bg']=FALSE_COLOR
 						button['text']=tests
-						button['command']=lambda:self.activeTestButton(button)
+						button['command']=lambda button=button:self.activeTestButton(button)
 						button.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
 						button.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
 			return
