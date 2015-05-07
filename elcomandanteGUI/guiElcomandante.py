@@ -979,8 +979,16 @@ class interface():
 
 	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
+		### * Plot * -------------------------------------------------------------------------------------------------------
+		#t = Toplevel(self.master)
+		#t.wm_title("Plot" )
+		#l = Label(t, text="This is Plot")
+		#l.pack(side="top", fill="both", expand=True, padx=100, pady=100)
+
+
+		### [END] Plot * ---------------------------------------------------------------------------------------------------
+
 		# Pad 
-		#mainRow+=1
 		mainRow=0
 		self.addXpad( self.master, row=mainRow)
 
@@ -1423,6 +1431,6 @@ class interface():
 if __name__ == '__main__':
 	root = Tk()
 	app = interface(master=root)
-	#app.loadConfig("./elComandante.ini.default")
 	app.createWidgets()
 	root.mainloop()
+
