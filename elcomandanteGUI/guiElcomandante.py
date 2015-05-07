@@ -626,14 +626,15 @@ class interface():
 		menu['bg'] = ERROR_COLOR
 		menu['fg']=TITLE4_COLOR
 		menu['font']=BUTTON_FONT
-		if not value.isdigit():
+		try:
+			fvalue = float(value)
+			menu['bg'] = MENU_FULL_COLOR
+			var.set(str(int(fvalue*2))+' Sec.')
+		except:
 			print ">> [ERROR] "+section+" '"+option+"' has wrong value '"+value+"'"
 			print ">>         Please select the number to fix it" 
 			var.set("ERROR")
-		else:
-			menu['bg'] = MENU_FULL_COLOR
-			var.set(str(int(float(value)*2))+' Sec.')
-
+				
 	def chooseDelay(self, menu, sec, section, option, var):
 		if self.isfixed:
 			print '>> [INFO] The menu is locked!'
