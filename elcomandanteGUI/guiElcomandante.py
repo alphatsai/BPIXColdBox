@@ -59,9 +59,10 @@ class interface():
 		self.testButtons={}
 		self.lastTestDirEntry={}
 		self.lastTestDirMenu={}
-		self.Menu={}
-		self.Var={}
-		self.testPath='./example/tests'
+		self.Menus={}
+		self.Vars={}
+		self.configDir = './example'
+		self.testDefinePath=''
 		self.confingurePath = { 'elComandante.ini' :'./elComandante.ini.default',
 					'elComandante.conf':'./elComandante.conf.default'
 					}
@@ -76,17 +77,15 @@ class interface():
 	def loadElcommandateIni(self):
 		self.iniClass = elComandante_ini()
 		self.iniClass.getDefault(self.confingurePath['elComandante.ini'])
-		self.loadTestsOptions()
 		return
 
 	def loadElcommandateConf(self):
 		self.confClass = elComandante_conf()
 		self.confClass.getDefault(self.confingurePath['elComandante.conf'])
-		self.loadTestsOptions()
 		return
 
 	def loadTestsOptions(self):
-		listDir = commands.getoutput('ls '+self.testPath)
+		listDir = commands.getoutput('ls '+self.testDefinePath)
 		self.tests = listDir.split('\n')
 		return
 
@@ -164,9 +163,9 @@ class interface():
 					else:
 						continue
 				# refresh menu 
-				for name in self.Menu:
-					menu = self.Menu[name]
-					var = self.Var[name]
+				for name in self.Menus:
+					menu = self.Menus[name]
+					var = self.Vars[name]
 					section = name.split('_')[2]
 					option = name.split('_')[3]
 					if section == 'IV':
@@ -205,13 +204,28 @@ class interface():
 					else:
 						continue
 				# refresh dir menu and entry
-				for name in self.Menu:
-					menu = self.Menu[name]
-					var = self.Var[name]
+				for name in self.Menus:
+					menu = self.Menus[name]
+					var = self.Vars[name]
 					section = name.split('_')[2]
 					option = name.split('_')[3]
 					if section == 'Directories':
-						self.setDirVar( menu, var, name, self.confClass.Sections[section][option])
+						#self.setDirVar( menu, var, name, self.confClass.Sections[section][option])
+						self.setDirVar( var, name, self.confClass.Sections[section][option])
+				# check test dir in ini's testButtons
+				for tests in ['Fulltest@17','Pretest@17', 'Fulltest@-20', 'Pretest@-20']:
+					name = 'ini_Process_Tests_'+tests
+					button = self.testButtons[name]
+					button['command']=''
+					button.unbind('<Button-1>')
+					button.unbind('<Leave>')
+					if self.checkTests(button, tests):
+						button['bg']=FALSE_COLOR
+						button['text']=tests
+						button['command']=lambda:self.activeTestButton(button)
+						button.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
+						button.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
+
 				self.currentPath = self.confingurePath['elComandante.conf']
 			else:
 				print ">> [ERROR] Can't find '%s'"% self.entryConfig.get()
@@ -241,8 +255,8 @@ class interface():
 				self.Entries[entry]['bg']=ENTRY_LOCKED_COLOR
 			if int(self.lastClickNewCycle) <= 10:
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
-				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
-				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
+				self.Vars['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
+				self.Menus['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
 			self.unTouchDir('conf_Directories_Directories_testDefinitions')
 			self.unTouchDir('conf_Directories_Directories_dataDir')
 	
@@ -471,11 +485,11 @@ class interface():
 
 	def checkTests(self, button, tests):
 		test = tests.split('@')[0]
-		testfile =  self.testPath+'/'+test
+		testfile =  self.testDefinePath+'/'+test
 		if test=='IV' or test== 'Cycle' or test=='Add new test' or test=='Delete' or test=='Clear':
 			return True
 		elif not os.path.isfile(testfile):
-			print ">> [ERROR] Can't find '"+test+"' in '"+self.testPath+"', or it's not a file..."
+			print ">> [ERROR] Can't find '"+test+"' in '"+self.testDefinePath+"', or it's not a file..."
 			button['text']=test+'??'
 			button['bg']=ERROR_COLOR
 			return False
@@ -557,8 +571,8 @@ class interface():
 					self.Entries['ini_Process_Tests_NewTest']['bg']=ENTRY_COLOR
 				else:
 					self.Entries['ini_Process_Tests_NewTest']['bg']=ERROR_COLOR
-					print ">> [ERROR] Not found '"+newtest+"' in "+self.testPath
-					print ">>         Please add it in '"+self.testPath+"' and reload"
+					print ">> [ERROR] Not found '"+newtest+"' in "+self.testDefinePath
+					print ">>         Please add it in '"+self.testDefinePath+"' and reload"
 					self.lastClickNewTest=''
 					return
 		else: 
@@ -605,8 +619,8 @@ class interface():
 			sec+=1
 		newMenu.grid( row=row, column=column, sticky=sticky)
 		self.setDelayVar(newMenu, var, name0, name1, value)
-		self.Menu[name]=newMenu
-		self.Var[name]=var
+		self.Menus[name]=newMenu
+		self.Vars[name]=var
 	
 	def setDelayVar(self, menu, var, section, option, value):
 		menu['bg'] = ERROR_COLOR
@@ -654,8 +668,8 @@ class interface():
 		newMenu['menu'].add_command(label='Other', command=lambda ilabel=ilabel:self.chooseCycle(newMenu,'Other',name0,name1,var))
 		newMenu.grid( row=row, column=column, sticky=sticky)
 		self.setCycleVar(newMenu, var, name0, name1, value)
-		self.Menu[name]=newMenu
-		self.Var[name]=var
+		self.Menus[name]=newMenu
+		self.Vars[name]=var
 
 	def setCycleVar(self, menu, var, section, option, value):
 		menu['bg'] = ERROR_COLOR
@@ -715,8 +729,8 @@ class interface():
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
 				self.Entries['ini_Process_Cycle_Other'].delete(0, END)
 				self.Entries['ini_Process_Cycle_Other']['bg']=ENTRY_COLOR
-				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
-				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
+				self.Vars['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
+				self.Menus['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
 				
 			print ">> [INFO] Change Cycle : nCycles : %s -> %s "%( value, newvalue)
 			self.iniClass.changeOptValue('Cycle', 'nCycles', newvalue)
@@ -728,8 +742,8 @@ class interface():
 				self.Labels['ini_Process_Cycle_HideOther'].tkraise()
 				self.Entries['ini_Process_Cycle_Other'].delete(0, END)
 				self.Entries['ini_Process_Cycle_Other']['bg']=ENTRY_COLOR
-				self.Var['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
-				self.Menu['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
+				self.Vars['ini_Process_Cycle_nCycles'].set(self.lastClickNewCycle)
+				self.Menus['ini_Process_Cycle_nCycles']['bg']=MENU_FULL_COLOR
 		return
 
 	### Add Menu for muduel tyes from configure file 
@@ -750,8 +764,8 @@ class interface():
 		newMenu['menu'].add_command( label="Roc",  command=lambda:self.chooseType( newMenu, 'Roc', name0, name1, var,))
 		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
 		self.setTypeVar( newMenu, var, name0, name1, value)
-		self.Menu[name]=newMenu
-		self.Var[name]=var
+		self.Menus[name]=newMenu
+		self.Vars[name]=var
 	
 	def setTypeVar(self, menu, var, section, option, value):
 		menu['bg'] = ERROR_COLOR
@@ -796,6 +810,10 @@ class interface():
 
 		var=StringVar()
 		newMenu = OptionMenu( frame, var, () )
+
+		self.Menus[name]=newMenu
+		self.Vars[name]=var
+
 		newMenu['width'] = width
 		newMenu['menu'].delete(0)
 		if name1 == 'testDefinitions':	
@@ -806,15 +824,15 @@ class interface():
 			newMenu['menu'].add_command( label="Other",  command=lambda:self.chooseTestDir( newMenu, 'Other', name, name0, name1, var,))
 	
 		newMenu.grid( row=row, column=column, sticky=sticky, columnspan=columnspan)
-		self.setDirVar( newMenu, var, name, value)
-		self.Menu[name]=newMenu
-		self.Var[name]=var
+		self.setDirVar( var, name, value)
 	
-	def setDirVar(self, menu, var, name, value):
+	def setDirVar(self, var, name, value):
+		menu = self.Menus[name]
 		menu['bg'] = ERROR_COLOR
 		menu['fg']=TITLE4_COLOR
 		menu['font']=BUTTON_FONT
 		terms = value.strip().split('/')
+		option = name.split('_')[3]
 		if terms[0]=='$configDir$':
 			menu['bg'] = MENU_FULL_COLOR
 			var.set('$configDir')
@@ -826,6 +844,8 @@ class interface():
 			self.Entries[name].insert(0, entry)
 			self.lastTestDirEntry[name]=entry
 			self.lastTestDirMenu[name]='$configDir'
+			self.testDefinePath = self.configDir+entry
+			self.loadTestsOptions()
 		elif terms[0]=='<!Directories|baseDir!>':
 			menu['bg'] = MENU_FULL_COLOR
 			var.set('$baseDir')
@@ -844,6 +864,9 @@ class interface():
 			self.Entries[name].insert(0, value)
 			self.lastTestDirEntry[name]=value
 			self.lastTestDirMenu[name]='Other'
+			if option == 'testDefinitions':
+				self.testDefinePath = value 
+				self.loadTestsOptions()
 		return
 
 	def chooseTestDir(self, menu, label, name, section, option, var):
@@ -851,7 +874,6 @@ class interface():
 			print '>> [INFO] The menu is locked!'
 			return
 
-		#if label == '$configDir':
 		self.Entries[name]['bg']=TYPING_COLOR
 		menu['bg'] = TYPING_COLOR
 		var.set(label)
@@ -861,8 +883,8 @@ class interface():
 		if murmur:
 			print '>> [INFO] The all dir is locked!'
 
-		menu = self.Menu[name]
-		var = self.Var[name]
+		menu = self.Menus[name]
+		var = self.Vars[name]
 		var.set(self.lastTestDirMenu[name])
 		if var.get() == 'Other':
 			menu['bg']=FALSE_COLOR
@@ -877,7 +899,7 @@ class interface():
 		if self.isfixed:
 			self.unTouchDir(name, murmur)
 			return
-		menu = self.Menu[name]
+		menu = self.Menus[name]
 		entry = self.Entries[name]
 		menu['bg']=TYPING_COLOR
 		entry['bg']=TYPING_COLOR
@@ -888,8 +910,8 @@ class interface():
 			self.unTouchDir(name, murmur)
 			return
 		entry = self.Entries[name]
-		menu = self.Menu[name]
-		var = self.Var[name]
+		menu = self.Menus[name]
+		var = self.Vars[name]
 		if self.lastTestDirMenu[name] == var.get() and self.lastTestDirEntry[name] == entry.get():
 			entry['bg']=ENTRY_COLOR
 			if var.get() == 'Other':
@@ -906,15 +928,21 @@ class interface():
 			option = name.split('_')[3]
 			value = self.confClass.Sections[section][option]
 			entry = self.Entries[name]
-			menu = self.Menu[name]
-			var = self.Var[name]
+			menu = self.Menus[name]
+			var = self.Vars[name]
 			newvalue = '' 
 			if var.get() == '$configDir':
 				newvalue = '$configDir$'+entry.get()
+				if option == 'testDefinitions':
+					self.testDefinePath = self.configDir+entry.get()
+					self.loadTestsOptions()
 			elif var.get() == '$baseDir':
 				newvalue = '<!Directories|baseDir!>'+entry.get()
 			else:
 				newvalue = entry.get()
+				if option == 'testDefinitions':
+					self.testDefinePath = entry.get() 
+					self.loadTestsOptions()
 
 			self.lastTestDirEntry[name]=entry.get()
 			self.lastTestDirMenu[name]=var.get()
@@ -922,10 +950,32 @@ class interface():
 				print ">> [INFO] Change %s : %s : %s -> %s "%(section, option, value, newvalue)
 				entry['bg']=ENTRY_COLOR
 				self.confClass.changeOptValue(section,option,newvalue)
-				return
+				if self.lastTestDirMenu[name] != 'Other':
+					menu['bg']=MENU_FULL_COLOR
+				else:
+					menu['bg']=FALSE_COLOR
 			else:
+				if self.lastTestDirMenu[name] != 'Other':
+					menu['bg']=MENU_FULL_COLOR
+				else:
+					menu['bg']=FALSE_COLOR
 				entry['bg']=ENTRY_COLOR
 				return
+			
+			if option == 'testDefinitions':
+				for tests in ['Fulltest@17','Pretest@17', 'Fulltest@-20', 'Pretest@-20']:
+					name = 'ini_Process_Tests_'+tests
+					button = self.testButtons[name]
+					button['command']=''
+					button.unbind('<Button-1>')
+					button.unbind('<Leave>')
+					if self.checkTests(button, tests):
+						button['bg']=FALSE_COLOR
+						button['text']=tests
+						button['command']=lambda:self.activeTestButton(button)
+						button.bind('<Button-1>', lambda event:self.changeColorTestEntry(0))
+						button.bind('<Leave>', lambda event:self.changeColorTestEntry(1))
+			return
 
 	######## * Main function and platform ####### ======================================================================================
 	def createWidgets(self):
@@ -991,6 +1041,158 @@ class interface():
 		self.ElConf.grid( row=mainRow, column=0, sticky=N+S+E+W, columnspan=COLUMNMAX )
 		self.frames["elComandante.ini"]=self.ElIni
 		self.frames["elComandante.conf"]=self.ElConf
+
+		### * elComandante_conf * -------------------------------------------------------------------------------------------------------
+		### DTBAddress = ['TB0', 'TB1', 'TB2', 'TB3']
+		# Pad 
+		elconfRow=0
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		irow=1
+		icol=1
+		self.addLabel( label='conf_DTB', name1='TestboardAddress', frame=self.DTBAddress, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
+		for opt in self.confClass.list_Default['TestboardAddress']:
+			value=self.confClass.Sections['TestboardAddress'][opt]
+			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=1)
+			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
+			icol+=1
+		irow+=1
+		self.expendWindow(self.DTBAddress, irow, icol)
+
+		### Subsysterm = ['subsystem', 'jumoClient', 'keithleyClient', 'psiClient']
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.Subsysterm.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		irow
+		icol=1
+		self.addLabel( label='conf_Subsysterm', name1='subsystem', frame=self.Subsysterm, font=SECTION_FONT, column=0, row=1, sticky='ew' )
+		for opt in self.confClass.list_Default['subsystem']:
+			if opt != 'Ziel' and opt != 'Port':
+				continue
+			value=self.confClass.Sections['subsystem'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, row=0, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, value=value, row=1, column=icol, sticky='ew', classType=ISCONF)
+			icol+=1
+
+		startCol=1
+		irow=4
+		icol=startCol
+		self.addLabel( label='conf_Subsysterm', name1='Clients', frame=self.Subsysterm, font=SECTION_FONT, column=0, row=irow-1, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='jumoClient',   frame=self.Subsysterm, font=SECTION_FONT, column=startCol, row=irow-2, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='keithleyClient', frame=self.Subsysterm, font=SECTION_FONT, column=startCol+1, row=irow-2, sticky='ew' )
+		self.addLabel( label='conf_Subsysterm', name1='psiClient',       frame=self.Subsysterm, font=SECTION_FONT, column=startCol+2, row=irow-2, sticky='ew', columnspan=3 )
+		for opt in self.confClass.list_Default['jumoClient']:
+			if opt != 'port':
+				continue
+			value=self.confClass.Sections['jumoClient'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF)
+			irow+=2
+		icol+=1
+
+		irow=4
+		for opt in self.confClass.list_Default['keithleyClient']:
+			if opt != 'port':
+				continue
+			value=self.confClass.Sections['keithleyClient'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew')
+			self.addOptEntry(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF)
+			irow+=2
+		icol+=1
+	
+		irow=4
+		for opt in self.confClass.list_Default['psiClient']:
+			value=self.confClass.Sections['psiClient'][opt]
+			self.addLabel(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew', columnspan=3)
+			self.addOptEntry(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF, columnspan=3)
+			irow+=2
+		icol+=3
+		self.expendWindow(self.Subsysterm, 6, icol)
+
+		### Directories = ['testDefinitions', 'dataDir', 'defaultParameters' ] and defaultParameters = [Full, Roc]
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.Directories = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.Directories.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		self.addLabel( label='conf_Directories', name1='Directories', frame=self.Directories, font=SECTION_FONT, column=0, row=1, sticky='ew' )
+		self.addLabel( label='conf_Directories', name1='defaultParameters', frame=self.Directories, font=SECTION_FONT, column=0, row=2, sticky='nsew', rowspan=2 )
+		self.addLabel( label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, font=SECTION_FONT, column=3, row=2, sticky='ew', bg=MENU_FULL_COLOR )
+		self.addLabel( label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, font=SECTION_FONT, column=3, row=3, sticky='ew', bg=MENU_ROC_COLOR  )
+
+		value = self.confClass.Sections['Directories']['defaultParameters']
+		self.addOptEntry(label='conf_Directories', name0='Directories', name1='defaultParameters', frame=self.Directories, value=value, row=2, column=1, sticky='nsew', rowspan=2, columnspan=2, classType=ISCONF)
+		value = self.confClass.Sections['defaultParameters']['Full']
+		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, value=value, row=2, column=4, sticky='ew', classType=ISCONF, width=15)
+		value = self.confClass.Sections['defaultParameters']['Roc']
+		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, value=value, row=3, column=4, sticky='ew', classType=ISCONF)
+
+		value = self.confClass.Sections['Directories']['testDefinitions']
+		self.addLabel(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, row=0, column=1, sticky='ew', columnspan=2)
+		self.addEntry(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, value='', row=1, column=2, sticky='ew')
+		self.addTestDirMenu( label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, value=value, row=1, column=1, sticky='ew')
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Key>', lambda event:self.changeDirBG('conf_Directories_Directories_testDefinitions'))
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
+		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_testDefinitions'))
+		self.Menus['conf_Directories_Directories_testDefinitions'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
+
+		value = self.confClass.Sections['Directories']['dataDir']
+		self.addLabel(label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, row=0, column=3, sticky='ew', columnspan=2)
+		self.addEntry(label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, value='', row=1, column=4, sticky='ew', width=15)
+		self.addTestDirMenu( label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, value=value, row=1, column=3, sticky='ew')
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<Key>', lambda event:self.changeDirBG('conf_Directories_Directories_dataDir'))
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
+		self.Entries['conf_Directories_Directories_dataDir'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_dataDir'))
+		self.Menus['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
+
+		self.expendWindow(self.Directories, 5, 5)
+
+		### Transfer = ['host', 'port', 'destination', 'user', 'checkFortar']
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.Transfer = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
+		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
+
+		irow=1
+		icol=1
+		self.addLabel( label='conf_Transfer', name1='Transfer', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
+		self.addLabel( label='conf_Transfer', name1='HideForAlignment', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow+2, sticky='ew', fg=BG_MASTER)
+		for opt in self.confClass.list_Default['Transfer']:
+			value=self.confClass.Sections['Transfer'][opt]
+			if opt == 'checkForTars':
+				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow+1, column=1, sticky='ew', columnspan=1)
+				self.addBoolButton( label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow+2, column=1, sticky='ew', classType=ISCONF, columnspan=1)
+				icol+=1
+			else:
+				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow-1, column=icol, sticky='ew', columnspan=1)
+				self.addOptEntry(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
+				icol+=1
+		irow+=1
+		self.expendWindow(self.Transfer, 5, icol-1)
+
+		# Pad 
+		elconfRow+=1
+		self.addXpad( self.ElConf, row=elconfRow)
+
+		elconfRow+=1
+		self.expendWindow(self.ElConf, elconfRow, COLUMNMAX)
+
+		### * [END] elComandante_conf * -------------------------------------------------------------------------------------------------------
+
 
 		### * elComandante_ini * -------------------------------------------------------------------------------------------------------
 		self.buttonIni.tkraise()
@@ -1143,14 +1345,14 @@ class interface():
 				irow+=1
 				self.addLabel(label='ini_Process', name0='Tests', name1='Options', frame=self.Process, row=irow, rowspan=2, sticky='ns', font=SECTION_FONT)
 				self.addTestButton(label='ini_Process', name0='Tests', name1='IV@17', frame=self.Process, row=irow, column=1, sticky='ew')
-				self.addTestButton(label='ini_Process', name0='Tests', name1='Pretest@17', frame=self.Process, row=irow, sticky='ew', column=2 )
-				self.addTestButton(label='ini_Process', name0='Tests', name1='Fulltest@17', frame=self.Process, row=irow, sticky='ew', column=3 )
+				self.addTestButton(label='ini_Process', name0='Tests', name1='Fulltest@17', frame=self.Process, row=irow, sticky='ew', column=2 )
+				self.addTestButton(label='ini_Process', name0='Tests', name1='Pretest@17', frame=self.Process, row=irow, sticky='ew', column=3 )
 				self.addTestButton(label='ini_Process', name0='Tests', name1='Cycle', frame=self.Process,row=irow,column=4,sticky='nsew', rowspan=2 )
 				self.addTestButton(label='ini_Process', name0='Tests', name1='Add new test', frame=self.Process,row=irow,column=5, columnspan=2, sticky='we')
 				irow+=1
 				self.addTestButton(label='ini_Process', name0='Tests', name1='IV@-20', frame=self.Process, row=irow, sticky='ew', column=1 )
-				self.addTestButton(label='ini_Process', name0='Tests', name1='Pretest@-20', frame=self.Process, row=irow, sticky='ew', column=2 )
-				self.addTestButton(label='ini_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, sticky='ew', column=3 )
+				self.addTestButton(label='ini_Process', name0='Tests', name1='Fulltest@-20', frame=self.Process, row=irow, sticky='ew', column=2)
+				self.addTestButton(label='ini_Process', name0='Tests', name1='Pretest@-20', frame=self.Process, row=irow, sticky='ew', column=3 )
 				# spacial iterm for adding new test 
 				self.addEntry(label='ini_Process', name0='Tests', name1='NewTest', frame=self.Process, value='Ex: IV@10', row=irow, column=5, sticky='ew', columnspan=2 )
 				self.lastClickNewTest='Ex: IV@10'
@@ -1197,157 +1399,6 @@ class interface():
 		eliniRow+=1
 		self.expendWindow(self.ElIni, eliniRow, COLUMNMAX)
 		### * [END] elComandante_ini * -------------------------------------------------------------------------------------------------------
-
-		### * elComandante_conf * -------------------------------------------------------------------------------------------------------
-		### DTBAddress = ['TB0', 'TB1', 'TB2', 'TB3']
-		# Pad 
-		elconfRow=0
-		self.addXpad( self.ElConf, row=elconfRow)
-
-		elconfRow+=1
-		self.DTBAddress = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
-		self.DTBAddress.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
-
-		irow=1
-		icol=1
-		self.addLabel( label='conf_DTB', name1='TestboardAddress', frame=self.DTBAddress, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
-		for opt in self.confClass.list_Default['TestboardAddress']:
-			value=self.confClass.Sections['TestboardAddress'][opt]
-			self.addLabel(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, row=irow-1, column=icol, sticky='ew', columnspan=1)
-			self.addOptEntry(label='conf_DTB', name0='TestboardAddress', name1=opt, frame=self.DTBAddress, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
-			icol+=1
-		irow+=1
-		self.expendWindow(self.DTBAddress, irow, icol)
-
-		### Subsysterm = ['subsystem', 'jumoClient', 'keithleyClient', 'psiClient']
-		elconfRow+=1
-		self.addXpad( self.ElConf, row=elconfRow)
-
-		elconfRow+=1
-		self.Subsysterm = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
-		self.Subsysterm.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
-
-		irow
-		icol=1
-		self.addLabel( label='conf_Subsysterm', name1='subsystem', frame=self.Subsysterm, font=SECTION_FONT, column=0, row=1, sticky='ew' )
-		for opt in self.confClass.list_Default['subsystem']:
-			if opt != 'Ziel' and opt != 'Port':
-				continue
-			value=self.confClass.Sections['subsystem'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, row=0, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='subsystem', name1=opt, frame=self.Subsysterm, value=value, row=1, column=icol, sticky='ew', classType=ISCONF)
-			icol+=1
-
-		startCol=1
-		irow=4
-		icol=startCol
-		self.addLabel( label='conf_Subsysterm', name1='Clients', frame=self.Subsysterm, font=SECTION_FONT, column=0, row=irow-1, sticky='ew' )
-		self.addLabel( label='conf_Subsysterm', name1='jumoClient',   frame=self.Subsysterm, font=SECTION_FONT, column=startCol, row=irow-2, sticky='ew' )
-		self.addLabel( label='conf_Subsysterm', name1='keithleyClient', frame=self.Subsysterm, font=SECTION_FONT, column=startCol+1, row=irow-2, sticky='ew' )
-		self.addLabel( label='conf_Subsysterm', name1='psiClient',       frame=self.Subsysterm, font=SECTION_FONT, column=startCol+2, row=irow-2, sticky='ew', columnspan=3 )
-		for opt in self.confClass.list_Default['jumoClient']:
-			if opt != 'port':
-				continue
-			value=self.confClass.Sections['jumoClient'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='jumoClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF)
-			irow+=2
-		icol+=1
-
-		irow=4
-		for opt in self.confClass.list_Default['keithleyClient']:
-			if opt != 'port':
-				continue
-			value=self.confClass.Sections['keithleyClient'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew')
-			self.addOptEntry(label='conf_Subsysterm', name0='keithleyClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF)
-			irow+=2
-		icol+=1
-	
-		irow=4
-		for opt in self.confClass.list_Default['psiClient']:
-			value=self.confClass.Sections['psiClient'][opt]
-			self.addLabel(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, row=irow-1, column=icol, sticky='ew', columnspan=3)
-			self.addOptEntry(label='conf_Subsysterm', name0='psiClient', name1=opt, frame=self.Subsysterm, value=value, row=irow, column=icol, sticky='ew', classType=ISCONF, columnspan=3)
-			irow+=2
-		icol+=3
-		self.expendWindow(self.Subsysterm, 6, icol)
-
-		### Directories = ['testDefinitions', 'dataDir', 'defaultParameters' ] and defaultParameters = [Full, Roc]
-		elconfRow+=1
-		self.addXpad( self.ElConf, row=elconfRow)
-
-		elconfRow+=1
-		self.Directories = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
-		self.Directories.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
-
-		self.addLabel( label='conf_Directories', name1='Directories', frame=self.Directories, font=SECTION_FONT, column=0, row=1, sticky='ew' )
-		self.addLabel( label='conf_Directories', name1='defaultParameters', frame=self.Directories, font=SECTION_FONT, column=0, row=2, sticky='nsew', rowspan=2 )
-		self.addLabel( label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, font=SECTION_FONT, column=3, row=2, sticky='ew', bg=MENU_FULL_COLOR )
-		self.addLabel( label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, font=SECTION_FONT, column=3, row=3, sticky='ew', bg=MENU_ROC_COLOR  )
-
-		value = self.confClass.Sections['Directories']['defaultParameters']
-		self.addOptEntry(label='conf_Directories', name0='Directories', name1='defaultParameters', frame=self.Directories, value=value, row=2, column=1, sticky='nsew', rowspan=2, columnspan=2, classType=ISCONF)
-		value = self.confClass.Sections['defaultParameters']['Full']
-		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Full', frame=self.Directories, value=value, row=2, column=4, sticky='ew', classType=ISCONF, width=15)
-		value = self.confClass.Sections['defaultParameters']['Roc']
-		self.addOptEntry(label='conf_Directories', name0='defaultParameters', name1='Roc', frame=self.Directories, value=value, row=3, column=4, sticky='ew', classType=ISCONF)
-
-		value = self.confClass.Sections['Directories']['testDefinitions']
-		self.addLabel(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, row=0, column=1, sticky='ew', columnspan=2)
-		self.addEntry(label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, value='', row=1, column=2, sticky='ew')
-		self.addTestDirMenu( label='conf_Directories', name0='Directories', name1='testDefinitions', frame=self.Directories, value=value, row=1, column=1, sticky='ew')
-		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Key>', lambda event:self.changeDirBG('conf_Directories_Directories_testDefinitions'))
-		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
-		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
-		self.Entries['conf_Directories_Directories_testDefinitions'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_testDefinitions'))
-		self.Menu['conf_Directories_Directories_testDefinitions'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_testDefinitions'))
-
-		value = self.confClass.Sections['Directories']['dataDir']
-		self.addLabel(label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, row=0, column=3, sticky='ew', columnspan=2)
-		self.addEntry(label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, value='', row=1, column=4, sticky='ew', width=15)
-		self.addTestDirMenu( label='conf_Directories', name0='Directories', name1='dataDir', frame=self.Directories, value=value, row=1, column=3, sticky='ew')
-		self.Entries['conf_Directories_Directories_dataDir'].bind('<Key>', lambda event:self.changeDirBG('conf_Directories_Directories_dataDir'))
-		self.Entries['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
-		self.Entries['conf_Directories_Directories_dataDir'].bind('<FocusOut>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
-		self.Entries['conf_Directories_Directories_dataDir'].bind('<Return>', lambda event:self.confirmTestDir('conf_Directories_Directories_dataDir'))
-		self.Menu['conf_Directories_Directories_dataDir'].bind('<Leave>', lambda event:self.checkDirChanging('conf_Directories_Directories_dataDir'))
-
-		self.expendWindow(self.Directories, 5, 5)
-
-		### Transfer = ['host', 'port', 'destination', 'user', 'checkFortar']
-		elconfRow+=1
-		self.addXpad( self.ElConf, row=elconfRow)
-
-		elconfRow+=1
-		self.Transfer = Frame( self.ElConf, bg=BG_MASTER, relief=RAISED, borderwidth=2)
-		self.Transfer.grid( row=elconfRow, column=1, sticky=N+S+E+W, columnspan=6 )
-
-		irow=1
-		icol=1
-		self.addLabel( label='conf_Transfer', name1='Transfer', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow, sticky='ew' )
-		self.addLabel( label='conf_Transfer', name1='HideForAlignment', frame=self.Transfer, font=SECTION_FONT, column=0, row=irow+2, sticky='ew', fg=BG_MASTER)
-		for opt in self.confClass.list_Default['Transfer']:
-			value=self.confClass.Sections['Transfer'][opt]
-			if opt == 'checkForTars':
-				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow+1, column=1, sticky='ew', columnspan=1)
-				self.addBoolButton( label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow+2, column=1, sticky='ew', classType=ISCONF, columnspan=1)
-				icol+=1
-			else:
-				self.addLabel(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, row=irow-1, column=icol, sticky='ew', columnspan=1)
-				self.addOptEntry(label='conf_Transfer', name0='Transfer', name1=opt, frame=self.Transfer, value=value, row=irow, column=icol, sticky='ew', columnspan=1, classType=ISCONF, width=15)
-				icol+=1
-		irow+=1
-		self.expendWindow(self.Transfer, 5, icol-1)
-
-		# Pad 
-		elconfRow+=1
-		self.addXpad( self.ElConf, row=elconfRow)
-
-		elconfRow+=1
-		self.expendWindow(self.ElConf, elconfRow, COLUMNMAX)
-
-		### * [END] elComandante_conf * -------------------------------------------------------------------------------------------------------
 
 		# Pad 
 		mainRow+=1
