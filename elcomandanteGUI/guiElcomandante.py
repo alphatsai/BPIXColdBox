@@ -64,11 +64,11 @@ class interface():
 		self.configDir = './example'
 		self.testDefinePath=''
 		self.confingurePath = { 'elComandante.ini' :'./elComandante.ini.default',
-					'elComandante.conf':'./elComandante.conf.default'
-					}
+								'elComandante.conf':'./elComandante.conf.default' }
+		self.confingureOutPut = { 'elComandante.ini' :'./elComandante.ini',
+								  'elComandante.conf':'./elComandante.conf' }
 		self.whichConfig = { 'elComandante.ini':True,
-				     'elComandante.conf':False
-				   }
+				     		 'elComandante.conf':False }
 		self.currentPath = self.confingurePath['elComandante.ini']
 		self.loadElcommandateIni();
 		self.loadElcommandateConf();
@@ -286,14 +286,14 @@ class interface():
 
 	### Save button
 	def addSave(self, frame, row=0, column=0, text="Save", bg=SAVE_COLOR, font=BUTTON2_FONT, columnspan=1, sticky='se', width=5):
-		self.SAVE = Button(frame, font=font, bg=bg, text=text, width=width, fg=TITLE4_COLOR, command= lambda:self.saveConfig(self.output) )
+		self.SAVE = Button(frame, font=font, bg=bg, text=text, width=width, fg=TITLE4_COLOR, command= lambda:self.saveConfig() )
 		self.SAVE.grid(row=row, column=column, columnspan=columnspan, sticky=sticky)
 
-	def saveConfig(self, output=None):
+	def saveConfig(self):
 		if self.whichConfig['elComandante.ini']:
-			self.iniClass.makeConfig(output)
+			self.iniClass.makeConfig(self.confingureOutPut['elComandante.ini'])
 		if self.whichConfig['elComandante.conf']:
-			self.confClass.makeConfig(output)
+			self.confClass.makeConfig(self.confingureOutPut['elComandante.conf'])
 		return
 
 	### Add commend label 
