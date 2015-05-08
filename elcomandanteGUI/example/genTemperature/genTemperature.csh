@@ -16,7 +16,7 @@ else
 	set sleepTime=$2
 endif
 
-if ( -e ../logfiles ) then
+if ( ! ( -e ../logfiles ) ) then
 	mkdir -p ../logfiles
 endif
 
