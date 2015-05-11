@@ -31,6 +31,7 @@ set maxTemp=20
 while (1)
 	set timestemp = `date +"%s"` 
 	set temperature = `./tempCosine.py $maxTemp $angle`
+	echo "$timestemp $temperature" 
 	echo "$timestemp $temperature" >> ../logfiles/$output
 	@ angle++
 	sleep $sleepTime
