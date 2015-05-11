@@ -26,12 +26,14 @@ while (1):
 		gh.SetPoint(i,(x-x0)/timeUnit, y)
 
 	gh.SetMarkerStyle(22)
-	gh.SetMarkerSize(0.7)
+	gh.SetMarkerSize(1)
 	gh.SetMarkerColor(kBlue-2)
+	gh.SetLineWidth(2)
+	gh.SetLineColor(kRed)
 	gh.SetTitle("")
 	gh.GetXaxis().SetTitle("Time [min]")
 	gh.GetYaxis().SetTitle("Temperature [#circC]")
-	gh.Draw("AP")
+	gh.Draw("APL")
 
 	c1.Modified()
 	c1.Update()
