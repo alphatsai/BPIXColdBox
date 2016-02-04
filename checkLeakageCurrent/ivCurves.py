@@ -17,7 +17,7 @@ parser.add_option("-i", "--inputDir", dest="inputDir",
                   help="Input file")
 parser.add_option("-o", "--outputr", dest="output", default=".",
                   help="Output path")
-parser.add_option("-s", "--sleep", dest="sleep", default=10,
+parser.add_option("-s", "--sleep", dest="sleep", default=5,
                   help="Sleep time")
 parser.add_option("-X", "--xMax", dest="xMax", default=310,
                   help="x-axis max")
@@ -47,9 +47,14 @@ yMin=0.1
 
 print '>> [INFO] Get %d IV dir in %s'%( len(ivDirs), options.inputDir )
 print '>>        -->  %s'%( ivDirs )
+print '>> [INFO] Turn off in %d sec.'%( options.sleep )
 
 ghMap = {}
 for ivDir in ivDirs:
+    ivlogPath = options.inputDir+"/"+ivDir+"/"+ivlog
+    if not os.path.isfile(ivlogPath):
+        print '>> [WARNNING] No %s in %s'%( ivlog, ivDir )
+        continue
     gh = TGraph(options.inputDir+"/"+ivDir+"/"+ivlog)
 
     x0, y0= Double(0), Double(0)
@@ -107,7 +112,7 @@ leg.SetFillColor(0)
 leg.SetFillStyle(0)
 
 iColor=1
-for ivDir in ivDirs:
+for ivDir in sorted(ghMap):
     ghMap[ivDir].SetMarkerStyle(8)
     ghMap[ivDir].SetMarkerSize(2)
     ghMap[ivDir].SetMarkerColor(iColor)
